@@ -26,11 +26,11 @@
       background-color: var(--ptps-bg-dark);
       color: var(--ptps-text-light);
       min-height: 100vh;
-      padding: 1.5rem;
-      transition: background-color 0.3s ease;
+      padding: 1.25rem;
+      transition: background-color 0.3s ease, padding 0.2s ease;
     }
 
-    /* Room-wide ambient alerts */
+    /* Ambient Alert Animations */
     body.time-loss-active {
       animation: room-alert-red 2s infinite ease-in-out;
     }
@@ -47,6 +47,7 @@
       50% { background-color: #451a03; }
     }
 
+    /* Header Navigation */
     header {
       max-width: 1300px;
       margin: 0 auto 1.5rem auto;
@@ -79,12 +80,6 @@
       color: var(--ptps-turquoise);
     }
 
-    .header-controls {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-    }
-
     .badge {
       background: var(--ptps-card-bg);
       border: 1px solid var(--ptps-turquoise);
@@ -95,11 +90,46 @@
       font-weight: 500;
     }
 
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    /* PC vs Mobile View Switcher Toggle */
+    .view-mode-selector {
+      display: flex;
+      background: var(--ptps-card-bg);
+      border: 1px solid var(--ptps-card-border);
+      border-radius: 2rem;
+      padding: 0.25rem;
+      gap: 0.2rem;
+    }
+
+    .view-btn {
+      background: transparent;
+      border: none;
+      color: var(--ptps-gray);
+      padding: 0.4rem 0.85rem;
+      border-radius: 1.5rem;
+      font-size: 0.825rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .view-btn.active {
+      background: var(--ptps-turquoise);
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(0, 164, 153, 0.4);
+    }
+
     .btn-reset-layout {
       background: var(--ptps-card-bg);
       border: 1px solid var(--ptps-card-border);
       color: var(--ptps-gray);
-      padding: 0.4rem 0.9rem;
+      padding: 0.45rem 0.9rem;
       border-radius: 2rem;
       font-size: 0.825rem;
       font-weight: 600;
@@ -112,26 +142,106 @@
       background: rgba(0, 164, 153, 0.1);
     }
 
-    /* Dashboard Grid Layout */
+    /* Dashboard Grid Base */
     .dashboard-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
       gap: 1.25rem;
       max-width: 1300px;
       margin: 0 auto;
     }
 
-    /* Dashboard Tile Drag-and-Drop Styling */
+    /* --- PC SPECIFIC VIEW STYLES --- */
+    body.view-pc .dashboard-grid {
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    }
+
+    body.view-pc .tile {
+      min-height: 180px;
+      padding: 1.25rem;
+      cursor: grab;
+    }
+
+    body.view-pc .display-main {
+      font-size: 2.25rem;
+    }
+
+    body.view-pc .control-btn {
+      padding: 0.85rem 2rem;
+      font-size: 1.15rem;
+    }
+
+    /* --- MOBILE SPECIFIC VIEW STYLES --- */
+    body.view-mobile {
+      padding: 0.75rem;
+    }
+
+    body.view-mobile header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.75rem;
+    }
+
+    body.view-mobile .header-controls {
+      width: 100%;
+      justify-content: space-between;
+    }
+
+    body.view-mobile .dashboard-grid {
+      grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
+      gap: 0.75rem;
+    }
+
+    body.view-mobile .tile {
+      min-height: 140px;
+      padding: 0.85rem;
+      border-radius: 0.85rem;
+    }
+
+    body.view-mobile .tile-title {
+      font-size: 0.9rem;
+    }
+
+    body.view-mobile .display-main {
+      font-size: 1.75rem;
+    }
+
+    body.view-mobile .tile-subtext {
+      font-size: 0.65rem;
+    }
+
+    body.view-mobile .tile-expand-icon {
+      font-size: 0.65rem;
+      padding: 0.2rem 0.35rem;
+    }
+
+    body.view-mobile .fullscreen-overlay {
+      padding: 1rem;
+    }
+
+    body.view-mobile .big-display {
+      font-size: 4.5rem;
+    }
+
+    body.view-mobile .control-btn {
+      width: 100%;
+      min-height: 48px; /* Touch-optimized tap targets */
+      font-size: 1.05rem;
+      padding: 0.75rem 1.2rem;
+      margin: 0.25rem 0;
+    }
+
+    body.view-mobile .music-grid {
+      grid-template-columns: 1fr !important;
+    }
+
+    /* Tile Component */
     .tile {
       background: var(--ptps-card-bg);
       border: 1px solid var(--ptps-card-border);
       border-radius: 1rem;
-      padding: 1.25rem;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      min-height: 180px;
-      cursor: grab;
       user-select: none;
       transition: transform 0.15s ease, border-color 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
       position: relative;
@@ -167,32 +277,28 @@
 
     .tile-title {
       font-weight: 600;
-      font-size: 1.05rem;
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.4rem;
       color: var(--ptps-text-light);
     }
 
     .drag-handle-icon {
       font-size: 0.9rem;
       color: var(--ptps-gray);
-      margin-right: 0.2rem;
       opacity: 0.6;
     }
 
     .tile-expand-icon {
-      font-size: 0.75rem;
       color: var(--ptps-gray);
       background: var(--ptps-bg-dark);
-      padding: 0.25rem 0.5rem;
       border-radius: 0.4rem;
       border: 1px solid var(--ptps-card-border);
     }
 
     .tile-body {
       text-align: center;
-      margin: 0.75rem 0;
+      margin: 0.5rem 0;
       flex-grow: 1;
       display: flex;
       flex-direction: column;
@@ -201,14 +307,12 @@
     }
 
     .display-main {
-      font-size: 2.25rem;
       font-weight: 800;
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
       color: var(--ptps-lime);
     }
 
     .tile-subtext {
-      font-size: 0.75rem;
       text-transform: uppercase;
       letter-spacing: 0.08em;
       color: var(--ptps-gray);
@@ -233,6 +337,7 @@
       flex-direction: column;
       padding: 2rem;
       transition: background-color 0.2s ease;
+      overflow-y: auto;
     }
 
     .fullscreen-overlay.active {
@@ -260,7 +365,7 @@
     }
 
     .fullscreen-title {
-      font-size: 2rem;
+      font-size: 1.75rem;
       font-weight: 700;
       color: var(--ptps-lime);
     }
@@ -269,7 +374,7 @@
       background: var(--ptps-card-border);
       border: 1px solid var(--ptps-gray);
       color: #fff;
-      font-size: 1rem;
+      font-size: 0.95rem;
       font-weight: 600;
       padding: 0.6rem 1.4rem;
       border-radius: 2rem;
@@ -306,34 +411,36 @@
     .loud-alert-banner {
       display: none;
       color: #ffffff;
-      font-size: 3.5rem;
+      font-size: 2.75rem;
       font-weight: 900;
       text-transform: uppercase;
       letter-spacing: 0.05em;
       text-shadow: 0 0 20px #000;
       margin-bottom: 1.5rem;
       animation: pulse-loud 0.3s infinite alternate;
+      text-align: center;
     }
 
     @keyframes pulse-loud {
       from { transform: scale(0.95); }
-      to { transform: scale(1.08); }
+      to { transform: scale(1.05); }
     }
 
     .control-btn {
       background: var(--ptps-turquoise);
       color: #fff;
       border: none;
-      font-size: 1.15rem;
       font-weight: 700;
-      padding: 0.85rem 2rem;
       border-radius: 0.75rem;
       cursor: pointer;
       margin: 0.35rem;
       transition: transform 0.1s, background 0.2s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
     }
     .control-btn:hover {
-      transform: scale(1.03);
+      transform: scale(1.02);
       background: #00837a;
     }
     .control-btn.danger { background: #ef4444; }
@@ -391,8 +498,8 @@
       border: 2px solid var(--ptps-card-border);
     }
     .light-bulb {
-      width: 90px;
-      height: 90px;
+      width: 80px;
+      height: 80px;
       border-radius: 50%;
       opacity: 0.25;
       cursor: pointer;
@@ -403,7 +510,7 @@
     .light-bulb.green { background: var(--ptps-lime); box-shadow: 0 0 30px var(--ptps-lime); }
     .light-bulb.active { opacity: 1; transform: scale(1.1); }
 
-    /* Interactive List & Container */
+    /* Interactive List Container */
     .interactive-list {
       width: 100%;
       max-width: 650px;
@@ -427,23 +534,21 @@
     /* Drag & Drop Desk Tiles in Seating Grid */
     .desk-tile {
       background: var(--ptps-card-bg);
-      padding: 1rem 0.75rem;
+      padding: 0.85rem 0.6rem;
       border-radius: 0.75rem;
       text-align: center;
       border: 2px dashed var(--ptps-card-border);
       font-size: 0.85rem;
       cursor: grab;
       user-select: none;
-      transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease, opacity 0.2s ease;
+      transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      min-height: 85px;
+      min-height: 80px;
     }
-    .desk-tile:active {
-      cursor: grabbing;
-    }
+    .desk-tile:active { cursor: grabbing; }
     .desk-tile:hover {
       border-color: var(--ptps-turquoise);
       transform: translateY(-2px);
@@ -476,7 +581,7 @@
       font-weight: 700;
       color: var(--ptps-turquoise);
       margin-bottom: 0.75rem;
-      font-size: 1.25rem;
+      font-size: 1.2rem;
       display: flex;
       align-items: center;
       gap: 0.4rem;
@@ -499,7 +604,7 @@
     }
   </style>
 </head>
-<body>
+<body class="view-pc">
 
   <header>
     <div class="header-title-group">
@@ -507,7 +612,12 @@
       <div class="badge">Pei Tong Primary School</div>
     </div>
     <div class="header-controls">
-      <button class="btn-reset-layout" onclick="resetTileOrder()">⇄ Reset Grid Layout</button>
+      <!-- Device View Choice Selector -->
+      <div class="view-mode-selector">
+        <button id="btnViewPc" class="view-btn active" onclick="setDeviceView('pc')">💻 PC View</button>
+        <button id="btnViewMobile" class="view-btn" onclick="setDeviceView('mobile')">📱 Mobile View</button>
+      </div>
+      <button class="btn-reset-layout" onclick="resetTileOrder()">⇄ Reset Grid</button>
     </div>
   </header>
 
@@ -610,6 +720,37 @@
       }
     }
 
+    // --- DEVICE VIEW SWITCHER (PC vs MOBILE) ---
+    let currentDeviceView = 'pc';
+
+    function loadDeviceViewChoice() {
+      const saved = localStorage.getItem('ptps_hub_device_view');
+      if (saved === 'mobile' || saved === 'pc') {
+        currentDeviceView = saved;
+      } else {
+        currentDeviceView = window.innerWidth <= 768 ? 'mobile' : 'pc';
+      }
+      applyDeviceView();
+    }
+
+    function setDeviceView(view) {
+      currentDeviceView = view;
+      localStorage.setItem('ptps_hub_device_view', view);
+      applyDeviceView();
+    }
+
+    function applyDeviceView() {
+      document.body.classList.remove('view-pc', 'view-mobile');
+      document.body.classList.add(`view-${currentDeviceView}`);
+      
+      const btnPc = document.getElementById('btnViewPc');
+      const btnMobile = document.getElementById('btnViewMobile');
+      if (btnPc && btnMobile) {
+        btnPc.classList.toggle('active', currentDeviceView === 'pc');
+        btnMobile.classList.toggle('active', currentDeviceView === 'mobile');
+      }
+    }
+
     // --- GLOBAL DATA & STATES ---
     let roster = ["Alex", "Jordan", "Taylor", "Morgan", "Sam", "Chris", "Riley", "Casey", "Avery", "Quinn", "Skyler", "Dakota"];
     let activeToolId = null;
@@ -663,26 +804,26 @@
       { id: 3, time: "10:15 AM", activity: "Reflection & Quiz" }
     ];
 
-    // --- BACKGROUND MUSIC STATE (REAL AUDIO LOOPS) ---
+    // --- BACKGROUND MUSIC CATALOG WITH SENTIMENTAL/SOOTHING INSTRUMENTAL FOCUS TRACKS ---
     const bgMusicCatalog = {
       "Hype": [
-        { name: "Hype Track 1", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" },
-        { name: "Hype Track 2", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" },
-        { name: "Hype Track 3", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3" },
-        { name: "Hype Track 4", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3" },
-        { name: "Hype Track 5", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3" }
+        { name: "Energetic Beat 1", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" },
+        { name: "Upbeat Grooves 2", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" },
+        { name: "High Energy Rhythm 3", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3" },
+        { name: "Dynamic Pulse 4", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3" },
+        { name: "Motivating Tempo 5", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3" }
       ],
       "Focus": [
-        { name: "Focus Track 1", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3" },
-        { name: "Focus Track 2", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-10.mp3" },
-        { name: "Focus Track 3", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-12.mp3" },
-        { name: "Focus Track 4", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-15.mp3" },
-        { name: "Focus Track 5", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-16.mp3" }
+        { name: "Peaceful Piano Lullaby", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3" },
+        { name: "Gentle Acoustic Calm", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3" },
+        { name: "Soothing Instrumental Solitude", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-9.mp3" },
+        { name: "Sentimental Ambient Keys", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-11.mp3" },
+        { name: "Calming Reflection Melody", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-14.mp3" }
       ]
     };
 
     let bgAudioPlayer = new Audio();
-    bgAudioPlayer.loop = true; // Loop audio continuously
+    bgAudioPlayer.loop = true;
     let isMusicPlaying = false;
     let currentMusicCategory = null;
     let currentMusicTrackName = null;
@@ -780,7 +921,7 @@
       seating: {
         title: "🪑 Seating Grid",
         getDisplay: () => `${seatingRows}x${seatingCols}`,
-        getSubtext: () => "DRAG & DROP DESKS"
+        getSubtext: () => "DESK LAYOUT"
       },
       notes: {
         title: "📝 Quick Notes",
@@ -805,7 +946,7 @@
       bgMusic: {
         title: "🎵 Background Music",
         getDisplay: () => isMusicPlaying ? "▶️" : "🎵",
-        getSubtext: () => isMusicPlaying ? currentMusicTrackName : "REAL MUSIC LOOPS"
+        getSubtext: () => isMusicPlaying ? currentMusicTrackName : "SOOTHING & HYPE"
       }
     };
 
@@ -826,7 +967,7 @@
         tileEl.innerHTML = `
           <div class="tile-header">
             <span class="tile-title"><span class="drag-handle-icon">⋮⋮</span> ${def.title}</span>
-            <span class="tile-expand-icon">⤢ Fullscreen</span>
+            <span class="tile-expand-icon">⤢</span>
           </div>
           <div class="tile-body">
             <div class="display-main" id="grid_${toolId}_display">${def.getDisplay()}</div>
@@ -834,14 +975,12 @@
           </div>
         `;
 
-        // Drag events for reordering dashboard tiles
         tileEl.addEventListener('dragstart', (e) => handleGridDragStart(e, toolId));
         tileEl.addEventListener('dragover', (e) => handleGridDragOver(e));
         tileEl.addEventListener('dragleave', (e) => handleGridDragLeave(e));
         tileEl.addEventListener('drop', (e) => handleGridDrop(e, toolId));
         tileEl.addEventListener('dragend', (e) => handleGridDragEnd(e));
 
-        // Click event to open tool fullscreen
         tileEl.addEventListener('click', () => {
           if (!isTileDragging) openTool(toolId);
         });
@@ -919,7 +1058,7 @@
           <p style="margin: 1.5rem 0; font-size: 1.25rem; color: var(--ptps-gray);" id="timeLossStatusText">
             ${timeLossRunning ? 'COUNTING WASTED TIME...' : 'TIMER PAUSED'}
           </p>
-          <div>
+          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: center; width:100%; max-width:400px;">
             <button class="control-btn ${timeLossRunning ? 'danger' : ''}" onclick="toggleTimeLoss()">
               ${timeLossRunning ? 'Stop Timer' : 'Start Timer'}
             </button>
@@ -930,15 +1069,15 @@
       else if (toolId === 'noiseMeter') {
         titleElem.textContent = '🎤 Noise Sensitivity Meter';
         contentElem.innerHTML = `
-          <div class="loud-alert-banner" id="loudAlertMsg">🔊 You are TOO LOUD!!!</div>
+          <div class="loud-alert-banner" id="loudAlertMsg">🔊 TOO LOUD!</div>
           <div class="big-display" id="noiseVolumeDisplay">0%</div>
           <div class="meter-container">
             <div class="meter-fill" id="noiseMeterFill"></div>
             <div class="sensitivity-line" id="sensitivityLine" style="left: ${noiseThreshold}%;"></div>
           </div>
-          <p style="margin-bottom: 1rem; color: var(--ptps-gray);">Set Threshold Limit: <span id="threshVal">${noiseThreshold}</span>%</p>
+          <p style="margin-bottom: 1rem; color: var(--ptps-gray);">Sensitivity Limit: <span id="threshVal">${noiseThreshold}</span>%</p>
           <input type="range" min="10" max="95" value="${noiseThreshold}" oninput="updateSensitivity(this.value)" />
-          <div style="margin-top: 2rem;">
+          <div style="margin-top: 2rem; width:100%; max-width:300px;">
             <button class="control-btn" onclick="toggleNoiseMic()">${isNoiseActive ? 'Stop Mic' : 'Start Mic'}</button>
           </div>
         `;
@@ -947,8 +1086,8 @@
       else if (toolId === 'picker') {
         titleElem.textContent = '🎲 Random Student Picker';
         contentElem.innerHTML = `
-          <div class="big-display" id="pickerBigDisplay" style="font-size: 5rem; color: var(--ptps-turquoise);">Ready</div>
-          <div style="margin-top: 2rem;">
+          <div class="big-display" id="pickerBigDisplay" style="font-size: 4.5rem; color: var(--ptps-turquoise); text-align: center;">Ready</div>
+          <div style="margin-top: 2rem; display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: center; width:100%; max-width:400px;">
             <button class="control-btn" onclick="shuffleStudent()">Pick Student</button>
             <button class="control-btn secondary" onclick="editRosterPrompt()">Edit Roster</button>
           </div>
@@ -958,8 +1097,10 @@
         titleElem.textContent = '🔔 Attention Bell';
         contentElem.innerHTML = `
           <div class="big-display" style="cursor:pointer;" onclick="playSound('bell')">🔔</div>
-          <p style="margin-top: 2rem; color: var(--ptps-gray);">Tap icon or button to chime</p>
-          <button class="control-btn" style="margin-top: 1rem;" onclick="playSound('bell')">Ring Bell</button>
+          <p style="margin-top: 2rem; color: var(--ptps-gray);">Tap bell to chime</p>
+          <div style="margin-top: 1rem; width:100%; max-width:300px;">
+            <button class="control-btn" onclick="playSound('bell')">Ring Bell</button>
+          </div>
         `;
       }
       else if (toolId === 'timer') {
@@ -967,28 +1108,27 @@
         contentElem.innerHTML = `
           <div class="big-display" id="timerBigDisplay">${formatTime(timerSeconds * 1000)}</div>
           
-          <div style="margin-top: 1.5rem; display: flex; gap: 0.5rem; justify-content: center;">
+          <div style="margin-top: 1.5rem; display: flex; gap: 0.5rem; justify-content: center; width:100%; max-width:400px;">
             <button class="control-btn ${timerRunning ? 'danger' : ''}" onclick="toggleTimer()">${timerRunning ? 'Pause' : 'Start'}</button>
             <button class="control-btn secondary" onclick="setTimerSecs(0)">Reset</button>
           </div>
 
-          <div style="margin-top: 1.5rem; display: flex; gap: 0.4rem; flex-wrap: wrap; justify-content: center; max-width: 650px;">
+          <div style="margin-top: 1.25rem; display: flex; gap: 0.4rem; flex-wrap: wrap; justify-content: center; max-width: 650px;">
             <button class="control-btn preset" onclick="setTimerSecs(10)">10s</button>
             <button class="control-btn preset" onclick="setTimerSecs(30)">30s</button>
-            <button class="control-btn preset" onclick="setTimerSecs(60)">1min</button>
-            <button class="control-btn preset" onclick="setTimerSecs(180)">3min</button>
-            <button class="control-btn preset" onclick="setTimerSecs(300)">5min</button>
-            <button class="control-btn preset" onclick="setTimerSecs(600)">10min</button>
-            <button class="control-btn preset" onclick="setTimerSecs(900)">15min</button>
-            <button class="control-btn preset" onclick="setTimerSecs(1200)">20min</button>
+            <button class="control-btn preset" onclick="setTimerSecs(60)">1m</button>
+            <button class="control-btn preset" onclick="setTimerSecs(180)">3m</button>
+            <button class="control-btn preset" onclick="setTimerSecs(300)">5m</button>
+            <button class="control-btn preset" onclick="setTimerSecs(600)">10m</button>
+            <button class="control-btn preset" onclick="setTimerSecs(900)">15m</button>
           </div>
 
-          <div style="margin-top: 1.5rem; display: flex; gap: 0.5rem; align-items: center; justify-content: center; background: var(--ptps-card-bg); padding: 0.75rem 1.25rem; border-radius: 1rem; border: 1px solid var(--ptps-card-border);">
-            <span style="font-size: 0.9rem; color: var(--ptps-gray); margin-right: 0.25rem;">Custom:</span>
-            <input type="number" id="customMin" placeholder="Min" min="0" max="180" style="width: 80px; text-align: center;" />
+          <div style="margin-top: 1.25rem; display: flex; gap: 0.5rem; align-items: center; justify-content: center; background: var(--ptps-card-bg); padding: 0.75rem 1rem; border-radius: 1rem; border: 1px solid var(--ptps-card-border); flex-wrap: wrap;">
+            <span style="font-size: 0.9rem; color: var(--ptps-gray);">Custom:</span>
+            <input type="number" id="customMin" placeholder="Min" min="0" max="180" style="width: 70px; text-align: center;" />
             <span style="font-weight: bold; color: var(--ptps-gray);">:</span>
-            <input type="number" id="customSec" placeholder="Sec" min="0" max="59" style="width: 80px; text-align: center;" />
-            <button class="control-btn" style="font-size: 0.95rem; padding: 0.6rem 1.2rem; margin: 0 0 0 0.5rem;" onclick="setCustomTimer()">Set Duration</button>
+            <input type="number" id="customSec" placeholder="Sec" min="0" max="59" style="width: 70px; text-align: center;" />
+            <button class="control-btn" style="font-size: 0.9rem; padding: 0.5rem 1rem; margin:0;" onclick="setCustomTimer()">Set</button>
           </div>
         `;
       }
@@ -996,7 +1136,7 @@
         titleElem.textContent = '⏱️ Stopwatch';
         contentElem.innerHTML = `
           <div class="big-display" id="stopwatchBigDisplay">${formatTime(stopwatchMs)}</div>
-          <div style="margin-top: 2rem;">
+          <div style="margin-top: 2rem; display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: center; width:100%; max-width:400px;">
             <button class="control-btn" onclick="toggleStopwatch()">${stopwatchRunning ? 'Stop' : 'Start'}</button>
             <button class="control-btn secondary" onclick="resetStopwatch()">Reset</button>
           </div>
@@ -1010,7 +1150,7 @@
             <div class="light-bulb yellow ${currentLight==='yellow'?'active':''}" onclick="setLight('yellow')"></div>
             <div class="light-bulb green ${currentLight==='green'?'active':''}" onclick="setLight('green')"></div>
           </div>
-          <p style="margin-top: 2rem; font-size: 1.5rem; text-transform: uppercase;" id="lightStatus">
+          <p style="margin-top: 2rem; font-size: 1.35rem; text-transform: uppercase;" id="lightStatus">
             ${currentLight === 'red' ? 'Silence / Stop' : currentLight === 'yellow' ? 'Whisper / Transition' : 'Group Work / Go'}
           </p>
         `;
@@ -1018,18 +1158,13 @@
       else if (toolId === 'groups') {
         titleElem.textContent = '👥 Group Generator';
         contentElem.innerHTML = `
-          <div class="interactive-list" id="groupListDisplay" style="min-height: 200px;">Tap a preset count to create random student groups</div>
-          
-          <div style="margin-top: 1.5rem; display: flex; gap: 0.4rem; flex-wrap: wrap; justify-content: center; max-width: 650px;">
+          <div class="interactive-list" id="groupListDisplay" style="min-height: 180px;">Tap a count to split students into groups</div>
+          <div style="margin-top: 1.25rem; display: flex; gap: 0.4rem; flex-wrap: wrap; justify-content: center; max-width: 650px;">
             <button class="control-btn preset" onclick="generateGroups(2)">2 Groups</button>
             <button class="control-btn preset" onclick="generateGroups(3)">3 Groups</button>
             <button class="control-btn preset" onclick="generateGroups(4)">4 Groups</button>
             <button class="control-btn preset" onclick="generateGroups(5)">5 Groups</button>
             <button class="control-btn preset" onclick="generateGroups(6)">6 Groups</button>
-            <button class="control-btn preset" onclick="generateGroups(7)">7 Groups</button>
-            <button class="control-btn preset" onclick="generateGroups(8)">8 Groups</button>
-            <button class="control-btn preset" onclick="generateGroups(9)">9 Groups</button>
-            <button class="control-btn preset" onclick="generateGroups(10)">10 Groups</button>
           </div>
         `;
       }
@@ -1038,19 +1173,19 @@
         renderAttendanceTool(contentElem);
       }
       else if (toolId === 'seating') {
-        titleElem.textContent = '🪑 Drag & Drop Seating Grid';
+        titleElem.textContent = '🪑 Seating Grid';
         renderSeatingGrid(contentElem);
       }
       else if (toolId === 'notes') {
         titleElem.textContent = '📝 Board Notes';
         contentElem.innerHTML = `
-          <textarea style="height: 300px; max-width: 700px; font-size: 1.25rem; width:100%;" placeholder="Type lesson instructions or goals for the class here..."></textarea>
+          <textarea style="height: 280px; max-width: 700px; font-size: 1.15rem; width:100%; border-radius: 0.75rem;" placeholder="Type lesson instructions or board notes..."></textarea>
         `;
       }
       else if (toolId === 'soundboard') {
         titleElem.textContent = '🔊 Class Soundboard';
         contentElem.innerHTML = `
-          <div>
+          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: center; width:100%; max-width:500px;">
             <button class="control-btn" onclick="playSound('bell')">🔔 Bell</button>
             <button class="control-btn" onclick="playSound('tada')">🎉 Ta-Da</button>
             <button class="control-btn danger" onclick="playSound('buzzer')">🚨 Buzzer</button>
@@ -1086,7 +1221,7 @@
           updateTileDisplay('noiseMeter');
           startMicProcessing();
         } catch(e) {
-          alert("Microphone access required for Noise Meter.");
+          alert("Microphone access is required for Noise Meter.");
         }
       } else {
         isNoiseActive = false;
@@ -1245,8 +1380,7 @@
       const secInput = document.getElementById('customSec');
       const m = parseInt(minInput ? minInput.value : 0) || 0;
       const s = parseInt(secInput ? secInput.value : 0) || 0;
-      const totalSecs = (m * 60) + s;
-      setTimerSecs(totalSecs);
+      setTimerSecs((m * 60) + s);
     }
 
     // --- STOPWATCH LOGIC ---
@@ -1335,13 +1469,9 @@
       const percent = total > 0 ? Math.round((presentCount / total) * 100) : 100;
 
       let html = `
-        <div style="margin-bottom: 1.25rem; display: flex; gap: 0.75rem; align-items: center; justify-content: center; flex-wrap: wrap;">
-          <button class="control-btn" style="font-size: 0.95rem; padding: 0.65rem 1.4rem; background: var(--ptps-lime); color: var(--ptps-bg-dark);" onclick="markAllPresent()">
-            ✓ All Present
-          </button>
-          <button class="control-btn danger" style="font-size: 0.95rem; padding: 0.65rem 1.4rem;" onclick="markAllAbsent()">
-            ✕ All Absent
-          </button>
+        <div style="margin-bottom: 1.25rem; display: flex; gap: 0.5rem; align-items: center; justify-content: center; flex-wrap: wrap; width:100%; max-width:400px;">
+          <button class="control-btn" style="font-size: 0.95rem; background: var(--ptps-lime); color: var(--ptps-bg-dark);" onclick="markAllPresent()">✓ All Present</button>
+          <button class="control-btn danger" style="font-size: 0.95rem;" onclick="markAllAbsent()">✕ All Absent</button>
         </div>
         <div style="margin-bottom: 1rem; color: var(--ptps-gray); font-size: 0.95rem; text-align: center;">
           Present: <strong style="color:var(--ptps-lime);">${presentCount}/${total}</strong> (${percent}%)
@@ -1355,7 +1485,7 @@
           <div class="list-item">
             <span style="font-size: 1.05rem; font-weight: 500;">${name}</span>
             <button class="control-btn ${isPresent ? '' : 'danger'}" 
-                    style="font-size: 0.85rem; padding: 0.35rem 1rem; margin: 0; min-width: 95px; text-align: center; ${isPresent ? 'background: var(--ptps-turquoise);' : ''}" 
+                    style="font-size: 0.85rem; padding: 0.35rem 0.9rem; margin: 0; width: auto; min-width: 95px;" 
                     onclick="toggleStudentAttendance('${name}')">
               ${isPresent ? '✓ Present' : '✕ Absent'}
             </button>
@@ -1400,23 +1530,23 @@
       syncSeatingArrangement();
 
       let html = `
-        <div style="margin-bottom: 1rem; display: flex; gap: 1rem; align-items: center; justify-content: center; background: var(--ptps-card-bg); padding: 0.75rem 1.25rem; border-radius: 1rem; border: 1px solid var(--ptps-card-border); flex-wrap: wrap;">
+        <div style="margin-bottom: 1rem; display: flex; gap: 0.75rem; align-items: center; justify-content: center; background: var(--ptps-card-bg); padding: 0.75rem; border-radius: 1rem; border: 1px solid var(--ptps-card-border); flex-wrap: wrap;">
           <label style="color:var(--ptps-gray); font-size:0.9rem;">Rows: 
-            <input type="number" id="seatRowsInput" value="${seatingRows}" min="1" max="10" style="width:65px; text-align:center; margin-left:0.25rem;" />
+            <input type="number" id="seatRowsInput" value="${seatingRows}" min="1" max="10" style="width:55px; text-align:center;" />
           </label>
           <span style="color:var(--ptps-gray);">x</span>
           <label style="color:var(--ptps-gray); font-size:0.9rem;">Cols: 
-            <input type="number" id="seatColsInput" value="${seatingCols}" min="1" max="10" style="width:65px; text-align:center; margin-left:0.25rem;" />
+            <input type="number" id="seatColsInput" value="${seatingCols}" min="1" max="10" style="width:55px; text-align:center;" />
           </label>
-          <button class="control-btn" style="font-size: 0.9rem; padding: 0.5rem 1rem; margin:0;" onclick="updateSeatingGridDimensions()">Set Grid</button>
-          <button class="control-btn secondary" style="font-size: 0.9rem; padding: 0.5rem 1rem; margin:0;" onclick="resetSeatingArrangement()">Reset / Auto-Fill</button>
+          <button class="control-btn" style="font-size: 0.85rem; padding: 0.4rem 0.8rem; margin:0; width:auto;" onclick="updateSeatingGridDimensions()">Set</button>
+          <button class="control-btn secondary" style="font-size: 0.85rem; padding: 0.4rem 0.8rem; margin:0; width:auto;" onclick="resetSeatingArrangement()">Auto-Fill</button>
         </div>
 
         <p style="color: var(--ptps-gray); font-size: 0.85rem; margin-bottom: 1rem; text-align: center;">
-          💡 <b>Drag and drop</b> any desk tile to swap student positions.
+          💡 Drag or tap desks to swap student placement.
         </p>
 
-        <div style="display:grid; grid-template-columns: repeat(${seatingCols}, 1fr); gap:0.75rem; width:100%; max-width:850px; max-height:380px; overflow-y:auto; padding: 0.5rem;">
+        <div style="display:grid; grid-template-columns: repeat(${seatingCols}, 1fr); gap:0.6rem; width:100%; max-width:850px; max-height:380px; overflow-y:auto; padding: 0.25rem;">
       `;
 
       const totalDesks = seatingRows * seatingCols;
@@ -1432,8 +1562,8 @@
                ondragleave="handleDeskDragLeave(event)"
                ondrop="handleDeskDrop(event, ${i})"
                ondragend="handleDeskDragEnd(event)">
-            <span style="font-size: 0.75rem; color: var(--ptps-gray); font-weight: 600;">Desk ${i+1}</span>
-            <strong style="color: ${isEmpty ? 'var(--ptps-gray)' : 'var(--ptps-turquoise)'}; font-size:0.95rem; margin-top:0.25rem; display:block;">
+            <span style="font-size: 0.7rem; color: var(--ptps-gray);">Desk ${i+1}</span>
+            <strong style="color: ${isEmpty ? 'var(--ptps-gray)' : 'var(--ptps-turquoise)'}; font-size:0.9rem; margin-top:0.15rem;">
               ${studentName}
             </strong>
           </div>
@@ -1497,10 +1627,10 @@
     // --- SCHEDULE LOGIC ---
     function renderSchedule(container) {
       let html = `
-        <div style="margin-bottom: 1rem; display: flex; gap: 0.5rem; width: 100%; max-width: 650px;">
-          <input type="text" id="newScheduleTime" placeholder="e.g. 09:00 AM" style="width: 140px;" />
-          <input type="text" id="newScheduleActivity" placeholder="Activity name..." style="flex: 1;" onkeypress="if(event.key==='Enter') addScheduleItem()" />
-          <button class="control-btn" style="font-size: 0.95rem; padding: 0.6rem 1.2rem; margin: 0;" onclick="addScheduleItem()">+ Add Task</button>
+        <div style="margin-bottom: 1rem; display: flex; gap: 0.5rem; width: 100%; max-width: 650px; flex-wrap: wrap;">
+          <input type="text" id="newScheduleTime" placeholder="e.g. 09:00 AM" style="width: 130px;" />
+          <input type="text" id="newScheduleActivity" placeholder="Activity name..." style="flex: 1; min-width:180px;" onkeypress="if(event.key==='Enter') addScheduleItem()" />
+          <button class="control-btn" style="font-size: 0.9rem; padding: 0.5rem 1rem; margin: 0; width:auto;" onclick="addScheduleItem()">+ Add</button>
         </div>
         <div class="interactive-list">
       `;
@@ -1508,9 +1638,9 @@
       scheduleData.forEach((item, idx) => {
         html += `
           <div class="list-item">
-            <input type="text" value="${item.time}" onchange="updateScheduleItem(${idx}, 'time', this.value)" style="width: 110px; background: var(--ptps-bg-dark); border: 1px solid var(--ptps-card-border); color: var(--ptps-turquoise); font-weight: bold; border-radius: 0.4rem; padding: 0.4rem 0.6rem; text-align: center;" />
-            <input type="text" value="${item.activity}" onchange="updateScheduleItem(${idx}, 'activity', this.value)" style="flex: 1; background: transparent; border: none; color: #fff; font-size: 1rem;" />
-            <button class="btn-close" style="padding: 0.2rem 0.6rem; font-size: 0.8rem;" onclick="removeScheduleItem(${idx})">✕</button>
+            <input type="text" value="${item.time}" onchange="updateScheduleItem(${idx}, 'time', this.value)" style="width: 100px; background: var(--ptps-bg-dark); border: 1px solid var(--ptps-card-border); color: var(--ptps-turquoise); font-weight: bold; border-radius: 0.4rem; padding: 0.35rem; text-align: center; font-size:0.85rem;" />
+            <input type="text" value="${item.activity}" onchange="updateScheduleItem(${idx}, 'activity', this.value)" style="flex: 1; background: transparent; border: none; color: #fff; font-size: 0.95rem;" />
+            <button class="btn-close" style="padding: 0.2rem 0.5rem; font-size: 0.75rem;" onclick="removeScheduleItem(${idx})">✕</button>
           </div>
         `;
       });
@@ -1532,9 +1662,7 @@
     }
 
     function updateScheduleItem(idx, field, val) {
-      if (scheduleData[idx]) {
-        scheduleData[idx][field] = val;
-      }
+      if (scheduleData[idx]) scheduleData[idx][field] = val;
     }
 
     function removeScheduleItem(idx) {
@@ -1546,9 +1674,9 @@
     // --- CHECKLIST LOGIC ---
     function renderChecklist(container) {
       let html = `
-        <div style="margin-bottom: 1rem; display: flex; gap: 0.5rem; width: 100%; max-width: 650px;">
-          <input type="text" id="newCheckitemText" placeholder="Add new checklist task..." style="flex: 1;" onkeypress="if(event.key==='Enter') addChecklistItem()" />
-          <button class="control-btn" style="font-size: 0.95rem; padding: 0.6rem 1.2rem; margin: 0;" onclick="addChecklistItem()">+ Add List Item</button>
+        <div style="margin-bottom: 1rem; display: flex; gap: 0.5rem; width: 100%; max-width: 650px; flex-wrap: wrap;">
+          <input type="text" id="newCheckitemText" placeholder="Add task..." style="flex: 1; min-width:180px;" onkeypress="if(event.key==='Enter') addChecklistItem()" />
+          <button class="control-btn" style="font-size: 0.9rem; padding: 0.5rem 1rem; margin: 0; width:auto;" onclick="addChecklistItem()">+ Add</button>
         </div>
         <div class="interactive-list">
       `;
@@ -1557,8 +1685,8 @@
         html += `
           <div class="list-item">
             <input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggleCheck(${idx})" style="width: 20px; height: 20px; cursor: pointer; accent-color: var(--ptps-turquoise);" />
-            <input type="text" value="${item.text}" onchange="updateChecklistText(${idx}, this.value)" style="flex:1; background:transparent; border:none; color:#fff; font-size:1rem; ${item.done ? 'text-decoration: line-through; opacity: 0.5;' : ''}" />
-            <button class="btn-close" style="padding: 0.2rem 0.6rem; font-size: 0.8rem;" onclick="removeChecklistItem(${idx})">✕</button>
+            <input type="text" value="${item.text}" onchange="updateChecklistText(${idx}, this.value)" style="flex:1; background:transparent; border:none; color:#fff; font-size:0.95rem; ${item.done ? 'text-decoration: line-through; opacity: 0.5;' : ''}" />
+            <button class="btn-close" style="padding: 0.2rem 0.5rem; font-size: 0.75rem;" onclick="removeChecklistItem(${idx})">✕</button>
           </div>
         `;
       });
@@ -1593,17 +1721,17 @@
       updateTileDisplay('checklist');
     }
 
-    // --- REAL BACKGROUND MUSIC LOGIC (CONTINUOUS LOOPS) ---
+    // --- REAL BACKGROUND MUSIC LOGIC ---
     function renderBackgroundMusic(container) {
       let html = `
-        <div style="margin-bottom: 1.5rem; text-align: center;">
-          <p style="font-size: 1.25rem; color: var(--ptps-lime); font-weight: 700; margin-bottom: 0.5rem;">
-            ${isMusicPlaying ? `▶️ Now Playing: ${currentMusicTrackName} (${currentMusicCategory})` : '⏹️ Music Stopped'}
+        <div style="margin-bottom: 1.5rem; text-align: center; width:100%;">
+          <p style="font-size: 1.15rem; color: var(--ptps-lime); font-weight: 700; margin-bottom: 0.5rem;">
+            ${isMusicPlaying ? `▶️ Now Playing: ${currentMusicTrackName}` : '⏹️ Music Stopped'}
           </p>
           <div style="display: flex; gap: 1rem; align-items: center; justify-content: center; flex-wrap: wrap;">
-            <button class="control-btn danger" onclick="stopBgMusic()">Stop Music</button>
+            <button class="control-btn danger" style="width:auto; padding: 0.5rem 1.2rem;" onclick="stopBgMusic()">Stop Music</button>
             <label style="color:var(--ptps-gray); font-size:0.9rem; display: flex; align-items: center; gap: 0.5rem;">Volume: 
-              <input type="range" min="0" max="1" step="0.05" value="${musicVolume}" oninput="setMusicVolume(this.value)" style="width: 140px;" />
+              <input type="range" min="0" max="1" step="0.05" value="${musicVolume}" oninput="setMusicVolume(this.value)" style="width: 120px;" />
             </label>
           </div>
         </div>
@@ -1611,8 +1739,12 @@
       `;
 
       for (let category in bgMusicCatalog) {
-        const catIcon = category === 'Hype' ? '🔥' : '🧠';
-        html += `<div class="music-card"><div class="music-card-title">${catIcon} ${category} (5 Tracks)</div>`;
+        const catIcon = category === 'Hype' ? '🔥' : '🎹';
+        const subTitle = category === 'Hype' ? 'Upbeat & Active' : 'Slow, Soothing Instrumental';
+        
+        html += `<div class="music-card">
+          <div class="music-card-title">${catIcon} ${category} Mode</div>
+          <p style="font-size: 0.75rem; color: var(--ptps-gray); margin-bottom: 0.75rem;">${subTitle}</p>`;
         
         bgMusicCatalog[category].forEach(trackObj => {
           const active = isMusicPlaying && currentMusicTrackName === trackObj.name;
@@ -1620,7 +1752,7 @@
             <button class="control-btn preset" style="width:100%; margin:0.3rem 0; text-align:left; display: flex; justify-content: space-between; align-items: center; ${active ? 'background:var(--ptps-lime); color:var(--ptps-bg-dark); font-weight:bold;' : ''}" 
               onclick="playBgMusic('${category}', '${trackObj.name}', '${trackObj.url}')">
               <span>${active ? '▶ ' : '🎵 '}${trackObj.name}</span>
-              <span style="font-size:0.75rem; opacity:0.8;">🔂 1-min Loop</span>
+              <span style="font-size:0.75rem; opacity:0.8;">🔂 Loop</span>
             </button>
           `;
         });
@@ -1636,7 +1768,7 @@
 
       bgAudioPlayer.pause();
       bgAudioPlayer.src = url;
-      bgAudioPlayer.loop = true; // Seamless 1-min loop
+      bgAudioPlayer.loop = true;
       bgAudioPlayer.volume = musicVolume;
       
       bgAudioPlayer.play().then(() => {
@@ -1646,7 +1778,7 @@
         updateTileDisplay('bgMusic');
         if (activeToolId === 'bgMusic') renderToolContent('bgMusic', document.getElementById('overlayTitle'), document.getElementById('overlayContent'));
       }).catch(err => {
-        alert("Audio playback failed or stream blocked: " + err.message);
+        alert("Audio playback failed: " + err.message);
       });
     }
 
@@ -1683,6 +1815,7 @@
 
     // --- INITIALIZATION ---
     window.addEventListener('DOMContentLoaded', () => {
+      loadDeviceViewChoice();
       loadSavedTileOrder();
       renderDashboardGrid();
     });
