@@ -186,7 +186,6 @@
       display: flex;
     }
 
-    /* Blinking Red Alert for Loud Noise */
     .fullscreen-overlay.loud-alert-active {
       animation: loud-bg-blink 0.35s infinite alternate ease-in-out;
     }
@@ -372,6 +371,40 @@
     }
     .list-item:last-child { border-bottom: none; }
 
+    /* Drag & Drop Desk Tiles in Seating Grid */
+    .desk-tile {
+      background: var(--ptps-card-bg);
+      padding: 1rem 0.75rem;
+      border-radius: 0.75rem;
+      text-align: center;
+      border: 2px dashed var(--ptps-card-border);
+      font-size: 0.85rem;
+      cursor: grab;
+      user-select: none;
+      transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease, opacity 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 85px;
+    }
+    .desk-tile:active {
+      cursor: grabbing;
+    }
+    .desk-tile:hover {
+      border-color: var(--ptps-turquoise);
+      transform: translateY(-2px);
+    }
+    .desk-tile.dragging {
+      opacity: 0.4;
+      border-color: var(--ptps-lime);
+    }
+    .desk-tile.drag-over {
+      border-color: var(--ptps-lime);
+      background: rgba(120, 190, 32, 0.15);
+      transform: scale(1.05);
+    }
+
     /* Music Category Section */
     .music-grid {
       display: grid;
@@ -535,7 +568,7 @@
       </div>
       <div class="tile-body">
         <div class="display-main" id="gridSeatingDimensions">4x4</div>
-        <div class="tile-subtext">ARRANGEMENT</div>
+        <div class="tile-subtext">DRAG & DROP ARRANGEMENT</div>
       </div>
     </div>
 
@@ -724,9 +757,11 @@
     // Traffic Light State
     let currentLight = 'red';
 
-    // Seating Grid State
+    // Seating Grid State & Drag-and-Drop
     let seatingRows = 4;
     let seatingCols = 4;
+    let seatingArrangement = [];
+    let draggedDeskIndex = null;
 
     // Checklist State
     let checklist = [
@@ -902,7 +937,7 @@
         contentElem.innerHTML = `<div class="interactive-list">${listHtml}</div>`;
       }
       else if (toolId === 'seating') {
-        titleElem.textContent = '🪑 Seating Grid';
+        titleElem.textContent = '🪑 Drag & Drop Seating Grid';
         renderSeatingGrid(contentElem);
       }
       else if (toolId === 'notes') {
@@ -1069,6 +1104,7 @@
       const input = prompt("Enter student names separated by commas:", roster.join(', '));
       if (input) {
         roster = input.split(',').map(s => s.trim()).filter(Boolean);
+        resetSeatingArrangement();
         alert("Roster updated!");
       }
     }
@@ -1164,10 +1200,40 @@
       document.getElementById('gridGroupText').textContent = `${num} Groups`;
     }
 
-    // --- SEATING GRID LOGIC ---
+    // --- SEATING GRID LOGIC WITH DRAG & DROP ---
+    function syncSeatingArrangement() {
+      const totalDesks = seatingRows * seatingCols;
+      if (seatingArrangement.length !== totalDesks) {
+        const oldArr = [...seatingArrangement];
+        seatingArrangement = [];
+        for (let i = 0; i < totalDesks; i++) {
+          if (i < oldArr.length && oldArr[i]) {
+            seatingArrangement.push(oldArr[i]);
+          } else if (i < roster.length) {
+            seatingArrangement.push(roster[i]);
+          } else {
+            seatingArrangement.push('Empty');
+          }
+        }
+      }
+    }
+
+    function resetSeatingArrangement() {
+      const totalDesks = seatingRows * seatingCols;
+      seatingArrangement = [];
+      for (let i = 0; i < totalDesks; i++) {
+        seatingArrangement.push(roster[i] || 'Empty');
+      }
+      if (activeToolId === 'seating') {
+        renderToolContent('seating', document.getElementById('overlayTitle'), document.getElementById('overlayContent'));
+      }
+    }
+
     function renderSeatingGrid(container) {
+      syncSeatingArrangement();
+
       let html = `
-        <div style="margin-bottom: 1.5rem; display: flex; gap: 1rem; align-items: center; justify-content: center; background: var(--ptps-card-bg); padding: 0.75rem 1.25rem; border-radius: 1rem; border: 1px solid var(--ptps-card-border);">
+        <div style="margin-bottom: 1rem; display: flex; gap: 1rem; align-items: center; justify-content: center; background: var(--ptps-card-bg); padding: 0.75rem 1.25rem; border-radius: 1rem; border: 1px solid var(--ptps-card-border); flex-wrap: wrap;">
           <label style="color:var(--ptps-gray); font-size:0.9rem;">Rows: 
             <input type="number" id="seatRowsInput" value="${seatingRows}" min="1" max="10" style="width:65px; text-align:center; margin-left:0.25rem;" />
           </label>
@@ -1175,18 +1241,34 @@
           <label style="color:var(--ptps-gray); font-size:0.9rem;">Cols: 
             <input type="number" id="seatColsInput" value="${seatingCols}" min="1" max="10" style="width:65px; text-align:center; margin-left:0.25rem;" />
           </label>
-          <button class="control-btn" style="font-size: 0.9rem; padding: 0.5rem 1rem;" onclick="updateSeatingGridDimensions()">Set Grid</button>
+          <button class="control-btn" style="font-size: 0.9rem; padding: 0.5rem 1rem; margin:0;" onclick="updateSeatingGridDimensions()">Set Grid</button>
+          <button class="control-btn secondary" style="font-size: 0.9rem; padding: 0.5rem 1rem; margin:0;" onclick="resetSeatingArrangement()">Reset / Auto-Fill</button>
         </div>
 
-        <div style="display:grid; grid-template-columns: repeat(${seatingCols}, 1fr); gap:0.75rem; width:100%; max-width:700px; max-height:350px; overflow-y:auto; padding: 0.5rem;">
+        <p style="color: var(--ptps-gray); font-size: 0.85rem; margin-bottom: 1rem; text-align: center;">
+          💡 <b>Drag and drop</b> any desk tile to swap student positions.
+        </p>
+
+        <div style="display:grid; grid-template-columns: repeat(${seatingCols}, 1fr); gap:0.75rem; width:100%; max-width:850px; max-height:380px; overflow-y:auto; padding: 0.5rem;">
       `;
 
       const totalDesks = seatingRows * seatingCols;
       for (let i = 0; i < totalDesks; i++) {
+        const studentName = seatingArrangement[i] || 'Empty';
+        const isEmpty = studentName === 'Empty';
+
         html += `
-          <div style="background:var(--ptps-card-bg); padding:0.8rem; border-radius:0.5rem; text-align:center; border:1px solid var(--ptps-card-border); font-size:0.85rem;">
-            Desk ${i+1}<br>
-            <strong style="color:var(--ptps-turquoise); display:block; margin-top:0.25rem;">${roster[i] || 'Empty'}</strong>
+          <div class="desk-tile" 
+               draggable="true" 
+               ondragstart="handleDeskDragStart(event, ${i})"
+               ondragover="handleDeskDragOver(event)"
+               ondragleave="handleDeskDragLeave(event)"
+               ondrop="handleDeskDrop(event, ${i})"
+               ondragend="handleDeskDragEnd(event)">
+            <span style="font-size: 0.75rem; color: var(--ptps-gray); font-weight: 600;">Desk ${i+1}</span>
+            <strong style="color: ${isEmpty ? 'var(--ptps-gray)' : 'var(--ptps-turquoise)'}; font-size:0.95rem; margin-top:0.25rem; display:block;">
+              ${studentName}
+            </strong>
           </div>
         `;
       }
@@ -1200,7 +1282,55 @@
       const c = parseInt(document.getElementById('seatColsInput').value) || 1;
       seatingRows = Math.max(1, Math.min(10, r));
       seatingCols = Math.max(1, Math.min(10, c));
+      
+      // Reset seating arrangement structure for new dimensions
+      seatingArrangement = [];
+      syncSeatingArrangement();
+      
       renderToolContent('seating', document.getElementById('overlayTitle'), document.getElementById('overlayContent'));
+    }
+
+    // Drag and Drop Event Handlers for Desk Tiles
+    function handleDeskDragStart(e, index) {
+      draggedDeskIndex = index;
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', index);
+      e.currentTarget.classList.add('dragging');
+    }
+
+    function handleDeskDragOver(e) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      e.currentTarget.classList.add('drag-over');
+    }
+
+    function handleDeskDragLeave(e) {
+      e.currentTarget.classList.remove('drag-over');
+    }
+
+    function handleDeskDrop(e, targetIndex) {
+      e.preventDefault();
+      e.currentTarget.classList.remove('drag-over');
+
+      if (draggedDeskIndex !== null && draggedDeskIndex !== targetIndex) {
+        // Swap student positions in seatingArrangement
+        const temp = seatingArrangement[draggedDeskIndex];
+        seatingArrangement[draggedDeskIndex] = seatingArrangement[targetIndex];
+        seatingArrangement[targetIndex] = temp;
+
+        // Re-render seating grid
+        const contentElem = document.getElementById('overlayContent');
+        if (activeToolId === 'seating') {
+          renderSeatingGrid(contentElem);
+        }
+      }
+      draggedDeskIndex = null;
+    }
+
+    function handleDeskDragEnd(e) {
+      e.currentTarget.classList.remove('dragging');
+      document.querySelectorAll('.desk-tile').forEach(tile => tile.classList.remove('drag-over'));
+      draggedDeskIndex = null;
     }
 
     // --- SCHEDULE LOGIC ---
