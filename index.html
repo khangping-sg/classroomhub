@@ -358,7 +358,7 @@
       border-radius: 1rem;
       padding: 1rem;
       border: 1px solid var(--ptps-card-border);
-      max-height: 400px;
+      max-height: 380px;
       overflow-y: auto;
     }
     .list-item {
@@ -757,6 +757,9 @@
     // Traffic Light State
     let currentLight = 'red';
 
+    // Attendance State
+    let attendanceStatus = {}; // { studentName: boolean (true = present, false = absent) }
+
     // Seating Grid State & Drag-and-Drop
     let seatingRows = 4;
     let seatingCols = 4;
@@ -928,13 +931,7 @@
       }
       else if (toolId === 'attendance') {
         titleElem.textContent = '📋 Student Attendance';
-        let listHtml = roster.map((name) => `
-          <div class="list-item">
-            <span>${name}</span>
-            <button class="btn-close" style="font-size:0.8rem;" onclick="this.textContent = this.textContent === 'Present' ? 'Absent' : 'Present'">Present</button>
-          </div>
-        `).join('');
-        contentElem.innerHTML = `<div class="interactive-list">${listHtml}</div>`;
+        renderAttendanceTool(contentElem);
       }
       else if (toolId === 'seating') {
         titleElem.textContent = '🪑 Drag & Drop Seating Grid';
@@ -1104,6 +1101,7 @@
       const input = prompt("Enter student names separated by commas:", roster.join(', '));
       if (input) {
         roster = input.split(',').map(s => s.trim()).filter(Boolean);
+        attendanceStatus = {}; // reset attendance tracking for new roster
         resetSeatingArrangement();
         alert("Roster updated!");
       }
@@ -1200,6 +1198,82 @@
       document.getElementById('gridGroupText').textContent = `${num} Groups`;
     }
 
+    // --- ATTENDANCE LOGIC ---
+    function initAttendance() {
+      roster.forEach(name => {
+        if (attendanceStatus[name] === undefined) {
+          attendanceStatus[name] = true; // Default Present
+        }
+      });
+    }
+
+    function markAllPresent() {
+      roster.forEach(name => { attendanceStatus[name] = true; });
+      updateAttendanceDisplay();
+    }
+
+    function markAllAbsent() {
+      roster.forEach(name => { attendanceStatus[name] = false; });
+      updateAttendanceDisplay();
+    }
+
+    function toggleStudentAttendance(name) {
+      attendanceStatus[name] = !attendanceStatus[name];
+      updateAttendanceDisplay();
+    }
+
+    function updateAttendanceDisplay() {
+      initAttendance();
+      const presentCount = roster.filter(name => attendanceStatus[name] !== false).length;
+      const total = roster.length;
+      const percent = total > 0 ? Math.round((presentCount / total) * 100) : 100;
+
+      document.getElementById('gridAttendance').textContent = `${percent}%`;
+
+      if (activeToolId === 'attendance') {
+        renderAttendanceTool(document.getElementById('overlayContent'));
+      }
+    }
+
+    function renderAttendanceTool(container) {
+      initAttendance();
+      const presentCount = roster.filter(name => attendanceStatus[name] !== false).length;
+      const total = roster.length;
+      const percent = total > 0 ? Math.round((presentCount / total) * 100) : 100;
+
+      let html = `
+        <div style="margin-bottom: 1.25rem; display: flex; gap: 0.75rem; align-items: center; justify-content: center; flex-wrap: wrap;">
+          <button class="control-btn" style="font-size: 0.95rem; padding: 0.65rem 1.4rem; background: var(--ptps-lime); color: var(--ptps-bg-dark);" onclick="markAllPresent()">
+            ✓ All Present
+          </button>
+          <button class="control-btn danger" style="font-size: 0.95rem; padding: 0.65rem 1.4rem;" onclick="markAllAbsent()">
+            ✕ All Absent
+          </button>
+        </div>
+        <div style="margin-bottom: 1rem; color: var(--ptps-gray); font-size: 0.95rem; text-align: center;">
+          Present: <strong style="color:var(--ptps-lime);">${presentCount}/${total}</strong> (${percent}%)
+        </div>
+        <div class="interactive-list">
+      `;
+
+      roster.forEach(name => {
+        const isPresent = attendanceStatus[name] !== false;
+        html += `
+          <div class="list-item">
+            <span style="font-size: 1.05rem; font-weight: 500;">${name}</span>
+            <button class="control-btn ${isPresent ? '' : 'danger'}" 
+                    style="font-size: 0.85rem; padding: 0.35rem 1rem; margin: 0; min-width: 95px; text-align: center; ${isPresent ? 'background: var(--ptps-turquoise);' : ''}" 
+                    onclick="toggleStudentAttendance('${name}')">
+              ${isPresent ? '✓ Present' : '✕ Absent'}
+            </button>
+          </div>
+        `;
+      });
+
+      html += `</div>`;
+      container.innerHTML = html;
+    }
+
     // --- SEATING GRID LOGIC WITH DRAG & DROP ---
     function syncSeatingArrangement() {
       const totalDesks = seatingRows * seatingCols;
@@ -1283,14 +1357,12 @@
       seatingRows = Math.max(1, Math.min(10, r));
       seatingCols = Math.max(1, Math.min(10, c));
       
-      // Reset seating arrangement structure for new dimensions
       seatingArrangement = [];
       syncSeatingArrangement();
       
       renderToolContent('seating', document.getElementById('overlayTitle'), document.getElementById('overlayContent'));
     }
 
-    // Drag and Drop Event Handlers for Desk Tiles
     function handleDeskDragStart(e, index) {
       draggedDeskIndex = index;
       e.dataTransfer.effectAllowed = 'move';
@@ -1313,12 +1385,10 @@
       e.currentTarget.classList.remove('drag-over');
 
       if (draggedDeskIndex !== null && draggedDeskIndex !== targetIndex) {
-        // Swap student positions in seatingArrangement
         const temp = seatingArrangement[draggedDeskIndex];
         seatingArrangement[draggedDeskIndex] = seatingArrangement[targetIndex];
         seatingArrangement[targetIndex] = temp;
 
-        // Re-render seating grid
         const contentElem = document.getElementById('overlayContent');
         if (activeToolId === 'seating') {
           renderSeatingGrid(contentElem);
