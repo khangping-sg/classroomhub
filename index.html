@@ -97,7 +97,7 @@
       flex-wrap: wrap;
     }
 
-    /* PC vs Mobile View Switcher Toggle */
+    /* View Switcher Toggle */
     .view-mode-selector {
       display: flex;
       background: var(--ptps-card-bg);
@@ -150,7 +150,7 @@
       margin: 0 auto;
     }
 
-    /* --- PC SPECIFIC VIEW STYLES --- */
+    /* PC VIEW STYLES */
     body.view-pc .dashboard-grid {
       grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
     }
@@ -166,11 +166,11 @@
     }
 
     body.view-pc .control-btn {
-      padding: 0.85rem 2rem;
-      font-size: 1.15rem;
+      padding: 0.85rem 1.8rem;
+      font-size: 1.1rem;
     }
 
-    /* --- MOBILE SPECIFIC VIEW STYLES --- */
+    /* MOBILE VIEW STYLES */
     body.view-mobile {
       padding: 0.75rem;
     }
@@ -224,7 +224,7 @@
 
     body.view-mobile .control-btn {
       width: 100%;
-      min-height: 48px; /* Touch-optimized tap targets */
+      min-height: 48px;
       font-size: 1.05rem;
       padding: 0.75rem 1.2rem;
       margin: 0.25rem 0;
@@ -326,7 +326,7 @@
       border: 2px solid #ef4444;
     }
 
-    /* Fullscreen Modal Overlay */
+    /* Fullscreen Overlay */
     .fullscreen-overlay {
       position: fixed;
       inset: 0;
@@ -398,7 +398,7 @@
       justify-content: center;
     }
 
-    /* Widget Components inside Fullscreen */
+    /* Widget Components */
     .big-display {
       font-size: 7.5rem;
       font-weight: 900;
@@ -528,10 +528,78 @@
       border-bottom: 1px solid var(--ptps-card-border);
       align-items: center;
       gap: 0.5rem;
+      transition: background 0.2s;
     }
     .list-item:last-child { border-bottom: none; }
+    .list-item[draggable="true"] {
+      cursor: grab;
+    }
+    .list-item[draggable="true"]:active {
+      cursor: grabbing;
+    }
+    .list-item.drag-over-item {
+      border-top: 2px solid var(--ptps-lime);
+      background: rgba(120, 190, 32, 0.1);
+    }
 
-    /* Drag & Drop Desk Tiles in Seating Grid */
+    /* Group Maker Interactive Drag & Drop Containers */
+    .group-container-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+      width: 100%;
+      max-width: 900px;
+      max-height: 420px;
+      overflow-y: auto;
+      padding: 0.5rem;
+    }
+    .group-card {
+      background: var(--ptps-card-bg);
+      border: 2px dashed var(--ptps-card-border);
+      border-radius: 0.85rem;
+      padding: 1rem;
+      min-height: 140px;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .group-card.group-drag-over {
+      border-color: var(--ptps-lime);
+      background: rgba(120, 190, 32, 0.1);
+    }
+    .group-card-header {
+      font-weight: 700;
+      color: var(--ptps-lime);
+      margin-bottom: 0.75rem;
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--ptps-card-border);
+      padding-bottom: 0.4rem;
+    }
+    .group-member-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+    .student-chip {
+      background: var(--ptps-bg-dark);
+      border: 1px solid var(--ptps-turquoise);
+      color: var(--ptps-text-light);
+      padding: 0.35rem 0.75rem;
+      border-radius: 1rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: grab;
+      user-select: none;
+      transition: transform 0.15s, background 0.2s;
+    }
+    .student-chip:active {
+      cursor: grabbing;
+    }
+    .student-chip.dragging {
+      opacity: 0.4;
+      border-color: var(--ptps-lime);
+    }
+
+    /* Drag & Drop Desk Tiles */
     .desk-tile {
       background: var(--ptps-card-bg);
       padding: 0.85rem 0.6rem;
@@ -569,7 +637,7 @@
       grid-template-columns: repeat(2, 1fr);
       gap: 1.25rem;
       width: 100%;
-      max-width: 800px;
+      max-width: 850px;
     }
     .music-card {
       background: var(--ptps-card-bg);
@@ -612,7 +680,6 @@
       <div class="badge">Pei Tong Primary School</div>
     </div>
     <div class="header-controls">
-      <!-- Device View Choice Selector -->
       <div class="view-mode-selector">
         <button id="btnViewPc" class="view-btn active" onclick="setDeviceView('pc')">💻 PC View</button>
         <button id="btnViewMobile" class="view-btn" onclick="setDeviceView('mobile')">📱 Mobile View</button>
@@ -622,9 +689,7 @@
   </header>
 
   <!-- DASHBOARD DYNAMIC GRID CONTAINER -->
-  <div class="dashboard-grid" id="dashboardGridContainer">
-    <!-- Rendered dynamically by JavaScript to support Drag and Drop Layout Reordering -->
-  </div>
+  <div class="dashboard-grid" id="dashboardGridContainer"></div>
 
   <!-- FULLSCREEN OVERLAY MODAL -->
   <div class="fullscreen-overlay" id="fullscreenOverlay">
@@ -632,12 +697,48 @@
       <div class="fullscreen-title" id="overlayTitle">Tool Name</div>
       <button class="btn-close" onclick="closeTool()">✕ Exit Full Screen</button>
     </div>
-    <div class="fullscreen-content" id="overlayContent">
-      <!-- Dynamic Content Loaded Here -->
-    </div>
+    <div class="fullscreen-content" id="overlayContent"></div>
   </div>
 
   <script>
+    // --- GLOBAL ROSTER PERSISTENCE & DEFAULTS ---
+    const DEFAULT_ROSTER = ["Alex", "Jordan", "Taylor", "Morgan", "Sam", "Chris", "Riley", "Casey", "Avery", "Quinn", "Skyler", "Dakota"];
+    let roster = [...DEFAULT_ROSTER];
+
+    function loadSavedRoster() {
+      try {
+        const saved = localStorage.getItem('ptps_classroom_roster');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            roster = parsed;
+          }
+        }
+      } catch(e) {}
+    }
+
+    function saveRoster(newRoster) {
+      roster = newRoster;
+      try {
+        localStorage.setItem('ptps_classroom_roster', JSON.stringify(roster));
+      } catch(e) {}
+      attendanceStatus = {};
+      resetSeatingArrangement();
+      updateTileDisplay('picker');
+      updateTileDisplay('attendance');
+    }
+
+    function resetRosterToDefault() {
+      roster = [...DEFAULT_ROSTER];
+      try {
+        localStorage.removeItem('ptps_classroom_roster');
+      } catch(e) {}
+      attendanceStatus = {};
+      resetSeatingArrangement();
+      updateTileDisplay('picker');
+      updateTileDisplay('attendance');
+    }
+
     // --- AUDIO SYNTHESIZER FOR SFX & BELLS ---
     let audioCtx = null;
     function initAudio() {
@@ -720,6 +821,102 @@
       }
     }
 
+    // --- SYNTHESIZED 30-SECOND MIDI MUSIC LOOP ENGINE ---
+    let musicMasterGain = null;
+    let isMusicPlaying = false;
+    let currentMusicCategory = null;
+    let currentMusicTrackName = null;
+    let synthLoopTimer = null;
+    let synthStepCounter = 0;
+    let musicVolume = 0.4;
+
+    const midiMusicCatalog = {
+      "Hype": [
+        { name: "Upbeat Anthem", scale: [261.63, 329.63, 392.00, 523.25, 659.25, 783.99], wave: "sawtooth", tempo: 150 },
+        { name: "Energetic Beat", scale: [220.00, 261.63, 329.63, 440.00, 523.25], wave: "square", tempo: 160 },
+        { name: "Victory Bounce", scale: [293.66, 369.99, 440.00, 587.33, 739.99], wave: "triangle", tempo: 145 },
+        { name: "Power Groove", scale: [196.00, 246.94, 293.66, 392.00, 493.88], wave: "sawtooth", tempo: 155 },
+        { name: "Super Charge", scale: [329.63, 415.30, 493.88, 659.25, 830.61], wave: "square", tempo: 165 }
+      ],
+      "Focus": [
+        { name: "Zen Flow", scale: [261.63, 293.66, 329.63, 392.00, 440.00], wave: "sine", tempo: 90 },
+        { name: "Peaceful Piano", scale: [329.63, 392.00, 493.88, 523.25, 659.25], wave: "triangle", tempo: 85 },
+        { name: "Study Chill", scale: [220.00, 261.63, 293.66, 329.63, 392.00], wave: "sine", tempo: 80 },
+        { name: "Calm Waves", scale: [174.61, 220.00, 261.63, 349.23, 440.00], wave: "triangle", tempo: 75 },
+        { name: "Deep Concentration", scale: [196.00, 220.00, 261.63, 293.66, 392.00], wave: "sine", tempo: 70 }
+      ]
+    };
+
+    function startSynthesizedMidiLoop(category, trackObj) {
+      stopBgMusic();
+      initAudio();
+
+      isMusicPlaying = true;
+      currentMusicCategory = category;
+      currentMusicTrackName = trackObj.name;
+      synthStepCounter = 0;
+
+      musicMasterGain = audioCtx.createGain();
+      musicMasterGain.gain.setValueAtTime(musicVolume, audioCtx.currentTime);
+      musicMasterGain.connect(audioCtx.destination);
+
+      const intervalMs = (60 / trackObj.tempo) * 500; // 8th note intervals
+
+      synthLoopTimer = setInterval(() => {
+        if (!isMusicPlaying) return;
+
+        const now = audioCtx.currentTime;
+        const noteFreq = trackObj.scale[synthStepCounter % trackObj.scale.length];
+        
+        const osc = audioCtx.createOscillator();
+        const noteGain = audioCtx.createGain();
+
+        osc.type = trackObj.wave;
+        osc.frequency.setValueAtTime(noteFreq, now);
+
+        // Soft envelope for synth loop notes
+        const dur = (intervalMs / 1000) * 0.9;
+        noteGain.gain.setValueAtTime(0.001, now);
+        noteGain.gain.linearRampToValueAtTime(category === 'Focus' ? 0.2 : 0.35, now + 0.05);
+        noteGain.gain.exponentialRampToValueAtTime(0.001, now + dur);
+
+        osc.connect(noteGain);
+        noteGain.connect(musicMasterGain);
+
+        osc.start(now);
+        osc.stop(now + dur);
+
+        synthStepCounter++;
+      }, intervalMs);
+
+      updateTileDisplay('bgMusic');
+      if (activeToolId === 'bgMusic') renderToolContent('bgMusic', document.getElementById('overlayTitle'), document.getElementById('overlayContent'));
+    }
+
+    function stopBgMusic() {
+      if (synthLoopTimer) {
+        clearInterval(synthLoopTimer);
+        synthLoopTimer = null;
+      }
+      if (musicMasterGain) {
+        try { musicMasterGain.disconnect(); } catch(e){}
+        musicMasterGain = null;
+      }
+      isMusicPlaying = false;
+      currentMusicCategory = null;
+      currentMusicTrackName = null;
+
+      updateTileDisplay('bgMusic');
+      if (activeToolId === 'bgMusic') renderToolContent('bgMusic', document.getElementById('overlayTitle'), document.getElementById('overlayContent'));
+    }
+
+    function setMusicVolume(val) {
+      musicVolume = parseFloat(val);
+      if (musicMasterGain) {
+        musicMasterGain.gain.setValueAtTime(musicVolume, audioCtx ? audioCtx.currentTime : 0);
+      }
+    }
+
     // --- DEVICE VIEW SWITCHER (PC vs MOBILE) ---
     let currentDeviceView = 'pc';
 
@@ -752,7 +949,6 @@
     }
 
     // --- GLOBAL DATA & STATES ---
-    let roster = ["Alex", "Jordan", "Taylor", "Morgan", "Sam", "Chris", "Riley", "Casey", "Avery", "Quinn", "Skyler", "Dakota"];
     let activeToolId = null;
 
     // Time Loss State
@@ -790,6 +986,10 @@
     let seatingArrangement = [];
     let draggedDeskIndex = null;
 
+    // Group Maker State
+    let generatedGroupData = [];
+    let draggedGroupStudent = null; // { fromGroupIdx, studentName }
+
     // Checklist State
     let checklist = [
       { id: 1, text: "Homework Collected", done: false },
@@ -803,32 +1003,6 @@
       { id: 2, time: "09:30 AM", activity: "Group Activity" },
       { id: 3, time: "10:15 AM", activity: "Reflection & Quiz" }
     ];
-
-    // --- BACKGROUND MUSIC CATALOG WITH SENTIMENTAL/SOOTHING INSTRUMENTAL FOCUS TRACKS ---
-    const bgMusicCatalog = {
-      "Hype": [
-        { name: "Energetic Beat 1", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" },
-        { name: "Upbeat Grooves 2", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" },
-        { name: "High Energy Rhythm 3", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3" },
-        { name: "Dynamic Pulse 4", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3" },
-        { name: "Motivating Tempo 5", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3" }
-      ],
-      "Focus": [
-        { name: "Peaceful Piano Lullaby", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3" },
-        { name: "Gentle Acoustic Calm", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3" },
-        { name: "Soothing Instrumental Solitude", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-9.mp3" },
-        { name: "Sentimental Ambient Keys", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-11.mp3" },
-        { name: "Calming Reflection Melody", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-14.mp3" }
-      ]
-    };
-
-    let bgAudioPlayer = new Audio();
-    bgAudioPlayer.loop = true;
-    let isMusicPlaying = false;
-    let currentMusicCategory = null;
-    let currentMusicTrackName = null;
-    let musicVolume = 0.4;
-    bgAudioPlayer.volume = musicVolume;
 
     // --- MAIN DASHBOARD DRAG & DROP TILE ORDER ---
     const defaultTileOrder = [
@@ -865,7 +1039,6 @@
       renderDashboardGrid();
     }
 
-    // Tool metadata definitions for dynamic grid rendering
     const toolDefinitions = {
       timeLoss: {
         title: "⏱️ Time Loss",
@@ -881,7 +1054,7 @@
       picker: {
         title: "🎲 Random Picker",
         getDisplay: () => document.getElementById('pickerBigDisplay') ? document.getElementById('pickerBigDisplay').textContent : "Pick",
-        getSubtext: () => "SELECT STUDENT"
+        getSubtext: () => `${roster.length} STUDENTS`
       },
       bell: {
         title: "🔔 Classroom Bell",
@@ -905,7 +1078,7 @@
       },
       groups: {
         title: "👥 Group Maker",
-        getDisplay: () => "4 Groups",
+        getDisplay: () => generatedGroupData.length > 0 ? `${generatedGroupData.length} Groups` : "4 Groups",
         getSubtext: () => "SHUFFLE TEAMS"
       },
       attendance: {
@@ -946,7 +1119,7 @@
       bgMusic: {
         title: "🎵 Background Music",
         getDisplay: () => isMusicPlaying ? "▶️" : "🎵",
-        getSubtext: () => isMusicPlaying ? currentMusicTrackName : "SOOTHING & HYPE"
+        getSubtext: () => isMusicPlaying ? currentMusicTrackName : "30s MIDI LOOPS"
       }
     };
 
@@ -1087,9 +1260,23 @@
         titleElem.textContent = '🎲 Random Student Picker';
         contentElem.innerHTML = `
           <div class="big-display" id="pickerBigDisplay" style="font-size: 4.5rem; color: var(--ptps-turquoise); text-align: center;">Ready</div>
-          <div style="margin-top: 2rem; display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: center; width:100%; max-width:400px;">
+          <div style="margin-top: 2rem; display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: center; width:100%; max-width:480px;">
             <button class="control-btn" onclick="shuffleStudent()">Pick Student</button>
-            <button class="control-btn secondary" onclick="editRosterPrompt()">Edit Roster</button>
+            <button class="control-btn secondary" onclick="openEditRosterModal()">Edit Roster List</button>
+          </div>
+
+          <div id="rosterEditorBox" style="display:none; margin-top:1.5rem; width:100%; max-width:600px; background:var(--ptps-card-bg); padding:1.25rem; border-radius:1rem; border:1px solid var(--ptps-card-border);">
+            <p style="font-size:0.85rem; color:var(--ptps-gray); margin-bottom:0.5rem;">
+              Paste or type student names below. Names can be separated by <strong>spaces</strong>, <strong>commas</strong>, or <strong>line breaks</strong>:
+            </p>
+            <textarea id="rosterTextInput" style="width:100%; height:120px; font-size:0.95rem; font-family:monospace; margin-bottom:0.75rem;">${roster.join('\n')}</textarea>
+            <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:0.5rem;">
+              <button class="control-btn danger" style="font-size:0.85rem; padding:0.4rem 0.8rem; margin:0;" onclick="handleResetRosterBtn()">Reset Namelist</button>
+              <div style="display:flex; gap:0.5rem;">
+                <button class="control-btn secondary" style="font-size:0.85rem; padding:0.4rem 0.8rem; margin:0;" onclick="closeEditRosterModal()">Cancel</button>
+                <button class="control-btn" style="font-size:0.85rem; padding:0.4rem 0.8rem; margin:0;" onclick="saveRosterFromInput()">Save Namelist</button>
+              </div>
+            </div>
           </div>
         `;
       }
@@ -1157,16 +1344,7 @@
       }
       else if (toolId === 'groups') {
         titleElem.textContent = '👥 Group Generator';
-        contentElem.innerHTML = `
-          <div class="interactive-list" id="groupListDisplay" style="min-height: 180px;">Tap a count to split students into groups</div>
-          <div style="margin-top: 1.25rem; display: flex; gap: 0.4rem; flex-wrap: wrap; justify-content: center; max-width: 650px;">
-            <button class="control-btn preset" onclick="generateGroups(2)">2 Groups</button>
-            <button class="control-btn preset" onclick="generateGroups(3)">3 Groups</button>
-            <button class="control-btn preset" onclick="generateGroups(4)">4 Groups</button>
-            <button class="control-btn preset" onclick="generateGroups(5)">5 Groups</button>
-            <button class="control-btn preset" onclick="generateGroups(6)">6 Groups</button>
-          </div>
-        `;
+        renderGroupMakerTool(contentElem);
       }
       else if (toolId === 'attendance') {
         titleElem.textContent = '📋 Student Attendance';
@@ -1201,7 +1379,7 @@
         renderChecklist(contentElem);
       }
       else if (toolId === 'bgMusic') {
-        titleElem.textContent = '🎵 Background Music Player';
+        titleElem.textContent = '🎵 30s MIDI Synthesizer Music';
         renderBackgroundMusic(contentElem);
       }
     }
@@ -1315,6 +1493,10 @@
 
     // --- STUDENT PICKER LOGIC ---
     function shuffleStudent() {
+      if (roster.length === 0) {
+        alert("Please add student names to your roster first!");
+        return;
+      }
       const disp = document.getElementById('pickerBigDisplay');
       if (!disp) return;
       let count = 0;
@@ -1329,13 +1511,41 @@
       }, 80);
     }
 
-    function editRosterPrompt() {
-      const input = prompt("Enter student names separated by commas:", roster.join(', '));
-      if (input) {
-        roster = input.split(',').map(s => s.trim()).filter(Boolean);
-        attendanceStatus = {};
-        resetSeatingArrangement();
-        alert("Roster updated!");
+    function openEditRosterModal() {
+      const box = document.getElementById('rosterEditorBox');
+      if (box) box.style.display = 'block';
+    }
+
+    function closeEditRosterModal() {
+      const box = document.getElementById('rosterEditorBox');
+      if (box) box.style.display = 'none';
+    }
+
+    function saveRosterFromInput() {
+      const input = document.getElementById('rosterTextInput');
+      if (!input) return;
+      const rawText = input.value;
+      // Split by newline, comma, OR space
+      const names = rawText
+        .split(/[\n\r,\s]+/)
+        .map(s => s.trim())
+        .filter(s => s.length > 0);
+
+      if (names.length === 0) {
+        alert("Please enter at least one valid name.");
+        return;
+      }
+
+      saveRoster(names);
+      closeEditRosterModal();
+      alert(`Saved ${names.length} students to browser history!`);
+      if (activeToolId === 'picker') renderToolContent('picker', document.getElementById('overlayTitle'), document.getElementById('overlayContent'));
+    }
+
+    function handleResetRosterBtn() {
+      if (confirm("Reset roster back to default names?")) {
+        resetRosterToDefault();
+        if (activeToolId === 'picker') renderToolContent('picker', document.getElementById('overlayTitle'), document.getElementById('overlayContent'));
       }
     }
 
@@ -1414,20 +1624,120 @@
       if (activeToolId === 'traffic') renderToolContent('traffic', document.getElementById('overlayTitle'), document.getElementById('overlayContent'));
     }
 
-    // --- GROUPS LOGIC ---
+    // --- GROUP MAKER WITH DRAG & DROP ADJUSTMENTS ---
     function generateGroups(num) {
       const shuffled = [...roster].sort(() => 0.5 - Math.random());
-      let html = '';
+      generatedGroupData = [];
       for (let i = 0; i < num; i++) {
-        html += `<div class="list-item"><b style="color:var(--ptps-lime);">Group ${i+1}</b><span>`;
-        const members = shuffled.filter((_, idx) => idx % num === i);
-        html += (members.length > 0 ? members.join(', ') : 'Empty') + `</span></div>`;
+        generatedGroupData.push([]);
       }
-      const container = document.getElementById('groupListDisplay');
-      if (container) container.innerHTML = html;
-      
-      const gridDisp = document.getElementById('grid_groups_display');
-      if (gridDisp) gridDisp.textContent = `${num} Groups`;
+      shuffled.forEach((name, idx) => {
+        generatedGroupData[idx % num].push(name);
+      });
+
+      if (activeToolId === 'groups') {
+        renderGroupMakerTool(document.getElementById('overlayContent'));
+      }
+      updateTileDisplay('groups');
+    }
+
+    function renderGroupMakerTool(container) {
+      if (generatedGroupData.length === 0) {
+        generateGroups(4);
+        return;
+      }
+
+      let html = `
+        <p style="color: var(--ptps-gray); font-size: 0.85rem; margin-bottom: 0.75rem; text-align: center;">
+          💡 Drag and drop student badges between group boxes to manually adjust teams.
+        </p>
+
+        <div style="margin-bottom: 1.25rem; display: flex; gap: 0.4rem; flex-wrap: wrap; justify-content: center; max-width: 650px;">
+          <button class="control-btn preset" onclick="generateGroups(2)">2 Groups</button>
+          <button class="control-btn preset" onclick="generateGroups(3)">3 Groups</button>
+          <button class="control-btn preset" onclick="generateGroups(4)">4 Groups</button>
+          <button class="control-btn preset" onclick="generateGroups(5)">5 Groups</button>
+          <button class="control-btn preset" onclick="generateGroups(6)">6 Groups</button>
+        </div>
+
+        <div class="group-container-grid">
+      `;
+
+      generatedGroupData.forEach((groupMembers, gIdx) => {
+        html += `
+          <div class="group-card" 
+               ondragover="handleGroupDragOver(event)" 
+               ondragleave="handleGroupDragLeave(event)" 
+               ondrop="handleGroupDrop(event, ${gIdx})">
+            <div class="group-card-header">
+              <span>Group ${gIdx + 1}</span>
+              <span style="font-size: 0.8rem; opacity: 0.8;">(${groupMembers.length})</span>
+            </div>
+            <div class="group-member-list">
+        `;
+
+        groupMembers.forEach((studentName) => {
+          html += `
+            <div class="student-chip" 
+                 draggable="true" 
+                 ondragstart="handleStudentChipDragStart(event, ${gIdx}, '${studentName.replace(/'/g, "\\'")}')"
+                 ondragend="handleStudentChipDragEnd(event)">
+              ${studentName}
+            </div>
+          `;
+        });
+
+        html += `
+            </div>
+          </div>
+        `;
+      });
+
+      html += `</div>`;
+      container.innerHTML = html;
+    }
+
+    function handleStudentChipDragStart(e, fromGroupIdx, studentName) {
+      draggedGroupStudent = { fromGroupIdx, studentName };
+      e.dataTransfer.effectAllowed = 'move';
+      e.currentTarget.classList.add('dragging');
+    }
+
+    function handleStudentChipDragEnd(e) {
+      e.currentTarget.classList.remove('dragging');
+      document.querySelectorAll('.group-card').forEach(c => c.classList.remove('group-drag-over'));
+      draggedGroupStudent = null;
+    }
+
+    function handleGroupDragOver(e) {
+      e.preventDefault();
+      e.currentTarget.classList.add('group-drag-over');
+    }
+
+    function handleGroupDragLeave(e) {
+      e.currentTarget.classList.remove('group-drag-over');
+    }
+
+    function handleGroupDrop(e, targetGroupIdx) {
+      e.preventDefault();
+      e.currentTarget.classList.remove('group-drag-over');
+
+      if (!draggedGroupStudent) return;
+      const { fromGroupIdx, studentName } = draggedGroupStudent;
+
+      if (fromGroupIdx !== targetGroupIdx) {
+        // Remove from source group
+        const srcList = generatedGroupData[fromGroupIdx];
+        const sIdx = srcList.indexOf(studentName);
+        if (sIdx > -1) srcList.splice(sIdx, 1);
+
+        // Add to target group
+        generatedGroupData[targetGroupIdx].push(studentName);
+
+        if (activeToolId === 'groups') {
+          renderGroupMakerTool(document.getElementById('overlayContent'));
+        }
+      }
     }
 
     // --- ATTENDANCE LOGIC ---
@@ -1543,7 +1853,7 @@
         </div>
 
         <p style="color: var(--ptps-gray); font-size: 0.85rem; margin-bottom: 1rem; text-align: center;">
-          💡 Drag or tap desks to swap student placement.
+          💡 Drag desks to customize student placement.
         </p>
 
         <div style="display:grid; grid-template-columns: repeat(${seatingCols}, 1fr); gap:0.6rem; width:100%; max-width:850px; max-height:380px; overflow-y:auto; padding: 0.25rem;">
@@ -1624,7 +1934,9 @@
       draggedDeskIndex = null;
     }
 
-    // --- SCHEDULE LOGIC ---
+    // --- SCHEDULE LOGIC WITH DRAG & DROP REORDERING ---
+    let draggedScheduleIdx = null;
+
     function renderSchedule(container) {
       let html = `
         <div style="margin-bottom: 1rem; display: flex; gap: 0.5rem; width: 100%; max-width: 650px; flex-wrap: wrap;">
@@ -1632,12 +1944,19 @@
           <input type="text" id="newScheduleActivity" placeholder="Activity name..." style="flex: 1; min-width:180px;" onkeypress="if(event.key==='Enter') addScheduleItem()" />
           <button class="control-btn" style="font-size: 0.9rem; padding: 0.5rem 1rem; margin: 0; width:auto;" onclick="addScheduleItem()">+ Add</button>
         </div>
+        <p style="color: var(--ptps-gray); font-size: 0.8rem; margin-bottom: 0.5rem; text-align: center;">💡 Drag items up/down to customize schedule order.</p>
         <div class="interactive-list">
       `;
 
       scheduleData.forEach((item, idx) => {
         html += `
-          <div class="list-item">
+          <div class="list-item" 
+               draggable="true" 
+               ondragstart="handleScheduleDragStart(event, ${idx})" 
+               ondragover="handleScheduleDragOver(event)" 
+               ondragleave="handleScheduleDragLeave(event)" 
+               ondrop="handleScheduleDrop(event, ${idx})">
+            <span style="color: var(--ptps-gray); cursor: grab; font-size: 0.9rem;">⋮⋮</span>
             <input type="text" value="${item.time}" onchange="updateScheduleItem(${idx}, 'time', this.value)" style="width: 100px; background: var(--ptps-bg-dark); border: 1px solid var(--ptps-card-border); color: var(--ptps-turquoise); font-weight: bold; border-radius: 0.4rem; padding: 0.35rem; text-align: center; font-size:0.85rem;" />
             <input type="text" value="${item.activity}" onchange="updateScheduleItem(${idx}, 'activity', this.value)" style="flex: 1; background: transparent; border: none; color: #fff; font-size: 0.95rem;" />
             <button class="btn-close" style="padding: 0.2rem 0.5rem; font-size: 0.75rem;" onclick="removeScheduleItem(${idx})">✕</button>
@@ -1671,19 +1990,53 @@
       updateTileDisplay('schedule');
     }
 
-    // --- CHECKLIST LOGIC ---
+    function handleScheduleDragStart(e, idx) {
+      draggedScheduleIdx = idx;
+      e.dataTransfer.effectAllowed = 'move';
+    }
+
+    function handleScheduleDragOver(e) {
+      e.preventDefault();
+      e.currentTarget.classList.add('drag-over-item');
+    }
+
+    function handleScheduleDragLeave(e) {
+      e.currentTarget.classList.remove('drag-over-item');
+    }
+
+    function handleScheduleDrop(e, targetIdx) {
+      e.preventDefault();
+      e.currentTarget.classList.remove('drag-over-item');
+      if (draggedScheduleIdx !== null && draggedScheduleIdx !== targetIdx) {
+        const movedItem = scheduleData.splice(draggedScheduleIdx, 1)[0];
+        scheduleData.splice(targetIdx, 0, movedItem);
+        if (activeToolId === 'schedule') renderSchedule(document.getElementById('overlayContent'));
+      }
+      draggedScheduleIdx = null;
+    }
+
+    // --- CHECKLIST LOGIC WITH DRAG & DROP REORDERING ---
+    let draggedChecklistIdx = null;
+
     function renderChecklist(container) {
       let html = `
         <div style="margin-bottom: 1rem; display: flex; gap: 0.5rem; width: 100%; max-width: 650px; flex-wrap: wrap;">
           <input type="text" id="newCheckitemText" placeholder="Add task..." style="flex: 1; min-width:180px;" onkeypress="if(event.key==='Enter') addChecklistItem()" />
           <button class="control-btn" style="font-size: 0.9rem; padding: 0.5rem 1rem; margin: 0; width:auto;" onclick="addChecklistItem()">+ Add</button>
         </div>
+        <p style="color: var(--ptps-gray); font-size: 0.8rem; margin-bottom: 0.5rem; text-align: center;">💡 Drag items to reorder priority.</p>
         <div class="interactive-list">
       `;
 
       checklist.forEach((item, idx) => {
         html += `
-          <div class="list-item">
+          <div class="list-item" 
+               draggable="true" 
+               ondragstart="handleChecklistDragStart(event, ${idx})" 
+               ondragover="handleChecklistDragOver(event)" 
+               ondragleave="handleChecklistDragLeave(event)" 
+               ondrop="handleChecklistDrop(event, ${idx})">
+            <span style="color: var(--ptps-gray); cursor: grab; font-size: 0.9rem;">⋮⋮</span>
             <input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggleCheck(${idx})" style="width: 20px; height: 20px; cursor: pointer; accent-color: var(--ptps-turquoise);" />
             <input type="text" value="${item.text}" onchange="updateChecklistText(${idx}, this.value)" style="flex:1; background:transparent; border:none; color:#fff; font-size:0.95rem; ${item.done ? 'text-decoration: line-through; opacity: 0.5;' : ''}" />
             <button class="btn-close" style="padding: 0.2rem 0.5rem; font-size: 0.75rem;" onclick="removeChecklistItem(${idx})">✕</button>
@@ -1721,12 +2074,37 @@
       updateTileDisplay('checklist');
     }
 
-    // --- REAL BACKGROUND MUSIC LOGIC ---
+    function handleChecklistDragStart(e, idx) {
+      draggedChecklistIdx = idx;
+      e.dataTransfer.effectAllowed = 'move';
+    }
+
+    function handleChecklistDragOver(e) {
+      e.preventDefault();
+      e.currentTarget.classList.add('drag-over-item');
+    }
+
+    function handleChecklistDragLeave(e) {
+      e.currentTarget.classList.remove('drag-over-item');
+    }
+
+    function handleChecklistDrop(e, targetIdx) {
+      e.preventDefault();
+      e.currentTarget.classList.remove('drag-over-item');
+      if (draggedChecklistIdx !== null && draggedChecklistIdx !== targetIdx) {
+        const movedItem = checklist.splice(draggedChecklistIdx, 1)[0];
+        checklist.splice(targetIdx, 0, movedItem);
+        if (activeToolId === 'checklist') renderToolContent('checklist', document.getElementById('overlayTitle'), document.getElementById('overlayContent'));
+      }
+      draggedChecklistIdx = null;
+    }
+
+    // --- BACKGROUND MUSIC PLAYER UI ---
     function renderBackgroundMusic(container) {
       let html = `
-        <div style="margin-bottom: 1.5rem; text-align: center; width:100%;">
+        <div style="margin-bottom: 1.25rem; text-align: center; width:100%;">
           <p style="font-size: 1.15rem; color: var(--ptps-lime); font-weight: 700; margin-bottom: 0.5rem;">
-            ${isMusicPlaying ? `▶️ Now Playing: ${currentMusicTrackName}` : '⏹️ Music Stopped'}
+            ${isMusicPlaying ? `▶️ Synthesizing: ${currentMusicTrackName}` : '⏹️ Music Stopped'}
           </p>
           <div style="display: flex; gap: 1rem; align-items: center; justify-content: center; flex-wrap: wrap;">
             <button class="control-btn danger" style="width:auto; padding: 0.5rem 1.2rem;" onclick="stopBgMusic()">Stop Music</button>
@@ -1735,24 +2113,25 @@
             </label>
           </div>
         </div>
+
         <div class="music-grid">
       `;
 
-      for (let category in bgMusicCatalog) {
+      for (let category in midiMusicCatalog) {
         const catIcon = category === 'Hype' ? '🔥' : '🎹';
-        const subTitle = category === 'Hype' ? 'Upbeat & Active' : 'Slow, Soothing Instrumental';
-        
+        const subTitle = category === 'Hype' ? 'Upbeat & Active (5 Loops)' : 'Soothing Ambient (5 Loops)';
+
         html += `<div class="music-card">
-          <div class="music-card-title">${catIcon} ${category} Mode</div>
+          <div class="music-card-title">${catIcon} ${category}</div>
           <p style="font-size: 0.75rem; color: var(--ptps-gray); margin-bottom: 0.75rem;">${subTitle}</p>`;
-        
-        bgMusicCatalog[category].forEach(trackObj => {
+
+        midiMusicCatalog[category].forEach(trackObj => {
           const active = isMusicPlaying && currentMusicTrackName === trackObj.name;
           html += `
             <button class="control-btn preset" style="width:100%; margin:0.3rem 0; text-align:left; display: flex; justify-content: space-between; align-items: center; ${active ? 'background:var(--ptps-lime); color:var(--ptps-bg-dark); font-weight:bold;' : ''}" 
-              onclick="playBgMusic('${category}', '${trackObj.name}', '${trackObj.url}')">
+              onclick='startSynthesizedMidiLoop("${category}", ${JSON.stringify(trackObj)})'>
               <span>${active ? '▶ ' : '🎵 '}${trackObj.name}</span>
-              <span style="font-size:0.75rem; opacity:0.8;">🔂 Loop</span>
+              <span style="font-size:0.75rem; opacity:0.8;">🔂 30s Loop</span>
             </button>
           `;
         });
@@ -1761,39 +2140,6 @@
 
       html += `</div>`;
       container.innerHTML = html;
-    }
-
-    function playBgMusic(category, trackName, url) {
-      if (isMusicPlaying && currentMusicTrackName === trackName) return;
-
-      bgAudioPlayer.pause();
-      bgAudioPlayer.src = url;
-      bgAudioPlayer.loop = true;
-      bgAudioPlayer.volume = musicVolume;
-      
-      bgAudioPlayer.play().then(() => {
-        isMusicPlaying = true;
-        currentMusicCategory = category;
-        currentMusicTrackName = trackName;
-        updateTileDisplay('bgMusic');
-        if (activeToolId === 'bgMusic') renderToolContent('bgMusic', document.getElementById('overlayTitle'), document.getElementById('overlayContent'));
-      }).catch(err => {
-        alert("Audio playback failed: " + err.message);
-      });
-    }
-
-    function stopBgMusic() {
-      bgAudioPlayer.pause();
-      isMusicPlaying = false;
-      currentMusicCategory = null;
-      currentMusicTrackName = null;
-      updateTileDisplay('bgMusic');
-      if (activeToolId === 'bgMusic') renderToolContent('bgMusic', document.getElementById('overlayTitle'), document.getElementById('overlayContent'));
-    }
-
-    function setMusicVolume(val) {
-      musicVolume = parseFloat(val);
-      bgAudioPlayer.volume = musicVolume;
     }
 
     // --- HELPER UTILITIES ---
@@ -1815,6 +2161,7 @@
 
     // --- INITIALIZATION ---
     window.addEventListener('DOMContentLoaded', () => {
+      loadSavedRoster();
       loadDeviceViewChoice();
       loadSavedTileOrder();
       renderDashboardGrid();
