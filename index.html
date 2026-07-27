@@ -1,0 +1,1432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Classroom Dashboard - Full Suite</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: #0f172a;
+      color: #f8fafc;
+      min-height: 100vh;
+      padding: 1.5rem;
+      transition: background-color 0.3s ease;
+    }
+
+    /* Room-wide ambient alerts */
+    body.time-loss-active {
+      animation: room-alert-red 2s infinite ease-in-out;
+    }
+    body.noise-alert-active {
+      animation: room-alert-orange 0.8s infinite ease-in-out;
+    }
+
+    @keyframes room-alert-red {
+      0%, 100% { background-color: #1a0f16; }
+      50% { background-color: #3b0d18; }
+    }
+    @keyframes room-alert-orange {
+      0%, 100% { background-color: #1c130b; }
+      50% { background-color: #451a03; }
+    }
+
+    header {
+      max-width: 1300px;
+      margin: 0 auto 1.5rem auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    h1 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .badge {
+      background: #1e293b;
+      border: 1px solid #334155;
+      padding: 0.35rem 0.8rem;
+      border-radius: 2rem;
+      font-size: 0.8rem;
+      color: #94a3b8;
+    }
+
+    /* Grid Layout */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 1.25rem;
+      max-width: 1300px;
+      margin: 0 auto;
+    }
+
+    /* Tile Styling */
+    .tile {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 1rem;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 180px;
+      cursor: pointer;
+      user-select: none;
+      transition: transform 0.15s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+      position: relative;
+    }
+
+    .tile:hover {
+      transform: translateY(-3px);
+      border-color: #38bdf8;
+      box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.4);
+    }
+
+    .tile-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+    }
+
+    .tile-title {
+      font-weight: 600;
+      font-size: 1.05rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .tile-expand-icon {
+      font-size: 0.8rem;
+      color: #64748b;
+      background: #0f172a;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.4rem;
+    }
+
+    .tile-body {
+      text-align: center;
+      margin: 0.75rem 0;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .display-main {
+      font-size: 2.25rem;
+      font-weight: 800;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      color: #f8fafc;
+    }
+
+    .tile-subtext {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #64748b;
+      margin-top: 0.3rem;
+    }
+
+    /* Time Loss Tile Specific */
+    .tile-time-loss {
+      background: linear-gradient(145deg, #1e293b, #0f172a);
+      border: 2px solid #ef4444;
+    }
+
+    /* Fullscreen Modal Overlay */
+    .fullscreen-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.96);
+      backdrop-filter: blur(12px);
+      z-index: 1000;
+      display: none;
+      flex-direction: column;
+      padding: 2rem;
+      transition: background-color 0.2s ease;
+    }
+
+    .fullscreen-overlay.active {
+      display: flex;
+    }
+
+    /* Blinking Red Alert for Loud Noise */
+    .fullscreen-overlay.loud-alert-active {
+      animation: loud-bg-blink 0.35s infinite alternate ease-in-out;
+    }
+
+    @keyframes loud-bg-blink {
+      0% { background: rgba(15, 23, 42, 0.96); }
+      100% { background: rgba(220, 38, 38, 0.92); }
+    }
+
+    .fullscreen-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto 1.5rem auto;
+    }
+
+    .fullscreen-title {
+      font-size: 2rem;
+      font-weight: 700;
+    }
+
+    .btn-close {
+      background: #334155;
+      border: none;
+      color: #fff;
+      font-size: 1.1rem;
+      font-weight: 600;
+      padding: 0.6rem 1.4rem;
+      border-radius: 2rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-close:hover {
+      background: #ef4444;
+    }
+
+    .fullscreen-content {
+      flex: 1;
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Widget Components inside Fullscreen */
+    .big-display {
+      font-size: 7.5rem;
+      font-weight: 900;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      line-height: 1;
+      letter-spacing: -0.04em;
+    }
+
+    .loud-alert-banner {
+      display: none;
+      color: #ffffff;
+      font-size: 3.5rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      text-shadow: 0 0 20px #000;
+      margin-bottom: 1.5rem;
+      animation: pulse-loud 0.3s infinite alternate;
+    }
+
+    @keyframes pulse-loud {
+      from { transform: scale(0.95); }
+      to { transform: scale(1.08); }
+    }
+
+    .control-btn {
+      background: #3b82f6;
+      color: #fff;
+      border: none;
+      font-size: 1.15rem;
+      font-weight: 700;
+      padding: 0.85rem 2rem;
+      border-radius: 0.75rem;
+      cursor: pointer;
+      margin: 0.35rem;
+      transition: transform 0.1s, background 0.2s;
+    }
+    .control-btn:hover {
+      transform: scale(1.03);
+      background: #2563eb;
+    }
+    .control-btn.danger { background: #ef4444; }
+    .control-btn.danger:hover { background: #dc2626; }
+    .control-btn.secondary { background: #475569; }
+    .control-btn.secondary:hover { background: #334155; }
+    .control-btn.preset {
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: #f8fafc;
+      font-size: 0.95rem;
+      padding: 0.55rem 1.1rem;
+    }
+    .control-btn.preset:hover {
+      background: #38bdf8;
+      color: #0f172a;
+      border-color: #38bdf8;
+    }
+
+    /* Meter Progress Bar */
+    .meter-container {
+      width: 100%;
+      max-width: 650px;
+      height: 28px;
+      background: #334155;
+      border-radius: 14px;
+      overflow: hidden;
+      margin: 1.5rem 0;
+      position: relative;
+    }
+    .meter-fill {
+      height: 100%;
+      width: 0%;
+      background: #22c55e;
+      transition: width 0.1s ease, background-color 0.2s ease;
+    }
+    .sensitivity-line {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: #ffffff;
+      box-shadow: 0 0 8px #fff;
+      z-index: 2;
+    }
+
+    /* Traffic Light */
+    .traffic-light-box {
+      background: #1e293b;
+      padding: 1.5rem;
+      border-radius: 2rem;
+      display: flex;
+      gap: 1.5rem;
+      border: 2px solid #334155;
+    }
+    .light-bulb {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      opacity: 0.25;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    .light-bulb.red { background: #ef4444; box-shadow: 0 0 30px #ef4444; }
+    .light-bulb.yellow { background: #eab308; box-shadow: 0 0 30px #eab308; }
+    .light-bulb.green { background: #22c55e; box-shadow: 0 0 30px #22c55e; }
+    .light-bulb.active { opacity: 1; transform: scale(1.1); }
+
+    /* Interactive List & Container */
+    .interactive-list {
+      width: 100%;
+      max-width: 650px;
+      background: #1e293b;
+      border-radius: 1rem;
+      padding: 1rem;
+      border: 1px solid #334155;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    .list-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid #334155;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .list-item:last-child { border-bottom: none; }
+
+    /* Music Category Section */
+    .music-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+      width: 100%;
+      max-width: 750px;
+    }
+    .music-card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      padding: 1rem;
+      border-radius: 0.75rem;
+    }
+    .music-card-title {
+      font-weight: 700;
+      color: #38bdf8;
+      margin-bottom: 0.5rem;
+      font-size: 1rem;
+    }
+
+    /* Form Controls */
+    input[type="text"], input[type="number"], textarea, select {
+      background: #0f172a;
+      border: 1px solid #334155;
+      color: #fff;
+      padding: 0.65rem 0.9rem;
+      border-radius: 0.5rem;
+      font-size: 1rem;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      max-width: 400px;
+      accent-color: #38bdf8;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Classroom Hub</h1>
+    <div class="badge">Click any tool to open Full Screen</div>
+  </header>
+
+  <!-- DASHBOARD GRID -->
+  <div class="dashboard-grid">
+    <!-- 1. TIME LOSS TOOL -->
+    <div class="tile tile-time-loss" onclick="openTool('timeLoss')">
+      <div class="tile-header">
+        <span class="tile-title">⏱️ Time Loss</span>
+        <span class="tile-expand-icon">⤢ Fullscreen</span>
+      </div>
+      <div class="tile-body">
+        <div class="display-main" id="gridTimeLoss">00:00</div>
+        <div class="tile-subtext" id="gridTimeLossStatus">TAP TO START</div>
+      </div>
+    </div>
+
+    <!-- 2. NOISE METER -->
+    <div class="tile" onclick="openTool('noiseMeter')">
+      <div class="tile-header">
+        <span class="tile-title">🎤 Noise Meter</span>
+        <span class="tile-expand-icon">⤢ Fullscreen</span>
+      </div>
+      <div class="tile-body">
+        <div class="display-main" id="gridNoiseLevel">OFF</div>
+        <div class="tile-subtext" id="gridNoiseSubtext">TAP TO START MIC</div>
+      </div>
+    </div>
+
+    <!-- 3. STUDENT PICKER -->
+    <div class="tile" onclick="openTool('picker')">
+      <div class="tile-header">
+        <span class="tile-title">🎲 Random Picker</span>
+        <span class="tile-expand-icon">⤢ Fullscreen</span>
+      </div>
+      <div class="tile-body">
+        <div class="display-main" id="gridPicker">Pick</div>
+        <div class="tile-subtext">SELECT STUDENT</div>
+      </div>
+    </div>
+
+    <!-- 4. BELL / CHIME -->
+    <div class="tile" onclick="openTool('bell')">
+      <div class="tile-header">
+        <span class="tile-title">🔔 Classroom Bell</span>
+        <span class="tile-expand-icon">⤢ Fullscreen</span>
+      </div>
+      <div class="tile-body">
+        <div class="display-main">🔔</div>
+        <div class="tile-subtext">ATTENTION CHIME</div>
+      </div>
+    </div>
+
+    <!-- 5. COUNTDOWN TIMER -->
+    <div class="tile" onclick="openTool('timer')">
+      <div class="tile-header">
+        <span class="tile-title">⏳ Countdown Timer</span>
+        <span class="tile-expand-icon">⤢ Fullscreen</span>
+      </div>
+      <div class="tile-body">
+        <div class="display-main" id="gridTimer">05:00</div>
+        <div class="tile-subtext">COUNTDOWN</div>
+      </div>
+    </div>
+
+    <!-- 6. STOPWATCH -->
+    <div class="tile" onclick="openTool('stopwatch')">
+      <div class="tile-header">
+        <span class="tile-title">⏱️ Stopwatch</span>
+        <span class="tile-expand-icon">⤢ Fullscreen</span>
+      </div>
+      <div class="tile-body">
+        <div class="display-main" id="gridStopwatch">00:00</div>
+        <div class="tile-subtext">ELAPSED TIME</div>
+      </div>
+    </div>
+
+    <!-- 7. TRAFFIC LIGHT -->
+    <div class="tile" onclick="openTool('traffic')">
+      <div class="tile-header">
+        <span class="tile-title">🚦 Traffic Light</span>
+        <span class="tile-expand-icon">⤢ Fullscreen</span>
+      </div>
+      <div class="tile-body">
+        <div class="display-main" id="gridTraffic">🔴</div>
+        <div class="tile-subtext">WORK STATE</div>
+      </div>
+    </div>
+
+    <!-- 8. GROUP MAKER -->
+    <div class="tile" onclick="openTool('groups')">
+      <div class="tile-header">
+        <span class="tile-title">👥 Group Maker</span>
+        <span class="tile-expand-icon">⤢ Fullscreen</span>
+      </div>
+      <div class="tile-body">
+        <div class="display-main" id="gridGroupText">4 Groups</div>
+        <div class="tile-subtext">SHUFFLE TEAMS</div>
+      </div>
+    </div>
+
+    <!-- 9. ATTENDANCE -->
+    <div class="tile" onclick="openTool('attendance')">
+      <div class="tile-header">
+        <span class="tile-title">📋 Attendance</span>
+        <span class="tile-expand-icon">⤢ Fullscreen</span>
+      </div>
+      <div class="tile-body">
+        <div class="display-main" id="gridAttendance">100%</div>
+        <div class="tile-subtext">PRESENT</div>
+      </div>
+    </div>
+
+    <!-- 10. SEATING CHART -->
+    <div class="tile" onclick="openTool('seating')">
+      <div class="tile-header">
+        <span class="tile-title">🪑 Seating Grid</span>
+        <span class="tile-expand-icon">⤢ Fullscreen</span>
+      </div>
+      <div class="tile-body">
+        <div class="display-main" id="gridSeatingDimensions">4x4</div>
+        <div class="tile-subtext">ARRANGEMENT</div>
+      </div>
+    </div>
+
+    <!-- 11. NOTES -->
+    <div class="tile" onclick="openTool('notes')">
+      <div class="tile-header">
+        <span class="tile-title">📝 Quick Notes</span>
+        <span class="tile-expand-icon">⤢ Fullscreen</span>
+      </div>
+      <div class="tile-body">
+        <div class="display-main">📄</div>
+        <div class="tile-subtext">BOARD NOTES</div>
+      </div>
+    </div>
+
+    <!-- 12. SOUNDBOARD -->
+    <div class="tile" onclick="openTool('soundboard')">
+      <div class="tile-header">
+        <span class="tile-title">🔊 Soundboard</span>
+        <span class="tile-expand-icon">⤢ Fullscreen</span>
+      </div>
+      <div class="tile-body">
+        <div class="display-main">🎶</div>
+        <div class="tile-subtext">SFX EFFECTS</div>
+      </div>
+    </div>
+
+    <!-- 13. SCHEDULE -->
+    <div class="tile" onclick="openTool('schedule')">
+      <div class="tile-header">
+        <span class="tile-title">📅 Schedule</span>
+        <span class="tile-expand-icon">⤢ Fullscreen</span>
+      </div>
+      <div class="tile-body">
+        <div class="display-main" id="gridScheduleCount">3 Tasks</div>
+        <div class="tile-subtext">LESSON PLAN</div>
+      </div>
+    </div>
+
+    <!-- 14. CHECKLIST -->
+    <div class="tile" onclick="openTool('checklist')">
+      <div class="tile-header">
+        <span class="tile-title">✅ Checklist</span>
+        <span class="tile-expand-icon">⤢ Fullscreen</span>
+      </div>
+      <div class="tile-body">
+        <div class="display-main" id="gridChecklist">0/3</div>
+        <div class="tile-subtext">DONE</div>
+      </div>
+    </div>
+
+    <!-- 15. BACKGROUND MUSIC -->
+    <div class="tile" onclick="openTool('bgMusic')">
+      <div class="tile-header">
+        <span class="tile-title">🎵 Background Music</span>
+        <span class="tile-expand-icon">⤢ Fullscreen</span>
+      </div>
+      <div class="tile-body">
+        <div class="display-main" id="gridMusicStatus">🎵</div>
+        <div class="tile-subtext" id="gridMusicSubtext">CLASSROOM SOUNDS</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FULLSCREEN OVERLAY MODAL -->
+  <div class="fullscreen-overlay" id="fullscreenOverlay">
+    <div class="fullscreen-header">
+      <div class="fullscreen-title" id="overlayTitle">Tool Name</div>
+      <button class="btn-close" onclick="closeTool()">✕ Exit Full Screen</button>
+    </div>
+    <div class="fullscreen-content" id="overlayContent">
+      <!-- Dynamic Content Loaded Here -->
+    </div>
+  </div>
+
+  <script>
+    // --- AUDIO SYNTHESIZER ---
+    let audioCtx = null;
+    function initAudio() {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+    }
+
+    function playSound(type) {
+      initAudio();
+      const now = audioCtx.currentTime;
+
+      if (type === 'start') {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.frequency.setValueAtTime(880, now);
+        osc.frequency.exponentialRampToValueAtTime(1320, now + 0.15);
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+        osc.start(now); osc.stop(now + 0.3);
+      } else if (type === 'stop') {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.frequency.setValueAtTime(523, now);
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+        osc.start(now); osc.stop(now + 0.25);
+      } else if (type === 'bell') {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(1046.5, now);
+        gain.gain.setValueAtTime(0.5, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 1.8);
+        osc.start(now); osc.stop(now + 1.8);
+      } else if (type === 'buzzer') {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(150, now);
+        gain.gain.setValueAtTime(0.4, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+        osc.start(now); osc.stop(now + 0.5);
+      } else if (type === 'loudAlert') {
+        // 1. High-pitched tone around 17.4 kHz (17,400 Hz) audible to youth
+        const highOsc = audioCtx.createOscillator();
+        const highGain = audioCtx.createGain();
+        highOsc.type = 'sine';
+        highOsc.frequency.setValueAtTime(17400, now);
+        highGain.gain.setValueAtTime(0.5, now);
+        highGain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+        highOsc.connect(highGain);
+        highGain.connect(audioCtx.destination);
+        highOsc.start(now);
+        highOsc.stop(now + 0.5);
+
+        // 2. Audible alert tone (800 Hz -> 400 Hz sweep) for adult awareness
+        const adultOsc = audioCtx.createOscillator();
+        const adultGain = audioCtx.createGain();
+        adultOsc.type = 'triangle';
+        adultOsc.frequency.setValueAtTime(800, now);
+        adultOsc.frequency.exponentialRampToValueAtTime(400, now + 0.4);
+        adultGain.gain.setValueAtTime(0.4, now);
+        adultGain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+        adultOsc.connect(adultGain);
+        adultGain.connect(audioCtx.destination);
+        adultOsc.start(now);
+        adultOsc.stop(now + 0.4);
+      } else if (type === 'tada') {
+        [523.25, 659.25, 783.99, 1046.5].forEach((freq, idx) => {
+          const o = audioCtx.createOscillator();
+          const g = audioCtx.createGain();
+          o.connect(g); g.connect(audioCtx.destination);
+          o.frequency.setValueAtTime(freq, now + idx * 0.08);
+          g.gain.setValueAtTime(0.3, now + idx * 0.08);
+          g.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.08 + 0.3);
+          o.start(now + idx * 0.08); o.stop(now + idx * 0.08 + 0.3);
+        });
+      }
+    }
+
+    // --- GLOBAL DATA & STATES ---
+    let roster = ["Alex", "Jordan", "Taylor", "Morgan", "Sam", "Chris", "Riley", "Casey", "Avery", "Quinn", "Skyler", "Dakota"];
+    let activeToolId = null;
+
+    // Time Loss State
+    let timeLossRunning = false;
+    let timeLossTotalMs = 0;
+    let timeLossStartMark = 0;
+    let timeLossInterval = null;
+
+    // Noise Meter State
+    let micStream = null;
+    let analyser = null;
+    let noiseThreshold = 65;
+    let isNoiseActive = false;
+    let lastNoiseAlertTime = 0;
+
+    // Countdown Timer State
+    let timerSeconds = 300;
+    let timerRunning = false;
+    let timerInterval = null;
+
+    // Stopwatch State
+    let stopwatchMs = 0;
+    let stopwatchRunning = false;
+    let stopwatchInterval = null;
+
+    // Traffic Light State
+    let currentLight = 'red';
+
+    // Seating Grid State
+    let seatingRows = 4;
+    let seatingCols = 4;
+
+    // Checklist State
+    let checklist = [
+      { id: 1, text: "Homework Collected", done: false },
+      { id: 2, text: "Page 42 Completed", done: false },
+      { id: 3, text: "Desks Cleaned", done: false }
+    ];
+
+    // Schedule State
+    let scheduleData = [
+      { id: 1, time: "09:00 AM", activity: "Math Warm-up" },
+      { id: 2, time: "09:30 AM", activity: "Group Activity" },
+      { id: 3, time: "10:15 AM", activity: "Reflection & Quiz" }
+    ];
+
+    // Background Music State
+    let currentMusicCategory = null;
+    let currentMusicTrackName = null;
+    let musicAudioNodes = [];
+    let musicGainNode = null;
+    let isMusicPlaying = false;
+
+    // --- FULLSCREEN CONTROLLER ---
+    function openTool(toolId) {
+      activeToolId = toolId;
+      const overlay = document.getElementById('fullscreenOverlay');
+      const title = document.getElementById('overlayTitle');
+      const content = document.getElementById('overlayContent');
+
+      overlay.classList.add('active');
+      renderToolContent(toolId, title, content);
+    }
+
+    function closeTool() {
+      document.getElementById('fullscreenOverlay').classList.remove('active');
+      document.getElementById('fullscreenOverlay').classList.remove('loud-alert-active');
+      activeToolId = null;
+    }
+
+    // --- TOOL RENDERER ---
+    function renderToolContent(toolId, titleElem, contentElem) {
+      contentElem.innerHTML = '';
+
+      if (toolId === 'timeLoss') {
+        titleElem.textContent = '⏱️ Classroom Time Loss Tool';
+        contentElem.innerHTML = `
+          <div class="big-display" id="timeLossBigDisplay">${formatTime(timeLossTotalMs)}</div>
+          <p style="margin: 1.5rem 0; font-size: 1.25rem; color: #94a3b8;" id="timeLossStatusText">
+            ${timeLossRunning ? 'COUNTING WASTED TIME...' : 'TIMER PAUSED'}
+          </p>
+          <div>
+            <button class="control-btn ${timeLossRunning ? 'danger' : ''}" onclick="toggleTimeLoss()">
+              ${timeLossRunning ? 'Stop Timer' : 'Start Timer'}
+            </button>
+            <button class="control-btn secondary" onclick="resetTimeLoss()">Reset Total</button>
+          </div>
+        `;
+      } 
+      else if (toolId === 'noiseMeter') {
+        titleElem.textContent = '🎤 Noise Sensitivity Meter';
+        contentElem.innerHTML = `
+          <div class="loud-alert-banner" id="loudAlertMsg">🔊 You are TOO LOUD!!!</div>
+          <div class="big-display" id="noiseVolumeDisplay">0%</div>
+          <div class="meter-container">
+            <div class="meter-fill" id="noiseMeterFill"></div>
+            <div class="sensitivity-line" id="sensitivityLine" style="left: ${noiseThreshold}%;"></div>
+          </div>
+          <p style="margin-bottom: 1rem; color: #94a3b8;">Set Threshold Limit: <span id="threshVal">${noiseThreshold}</span>%</p>
+          <input type="range" min="10" max="95" value="${noiseThreshold}" oninput="updateSensitivity(this.value)" />
+          <div style="margin-top: 2rem;">
+            <button class="control-btn" onclick="toggleNoiseMic()">${isNoiseActive ? 'Stop Mic' : 'Start Mic'}</button>
+          </div>
+        `;
+        if (isNoiseActive) startMicProcessing();
+      }
+      else if (toolId === 'picker') {
+        titleElem.textContent = '🎲 Random Student Picker';
+        contentElem.innerHTML = `
+          <div class="big-display" id="pickerBigDisplay" style="font-size: 5rem; color: #38bdf8;">Ready</div>
+          <div style="margin-top: 2rem;">
+            <button class="control-btn" onclick="shuffleStudent()">Pick Student</button>
+            <button class="control-btn secondary" onclick="editRosterPrompt()">Edit Roster</button>
+          </div>
+        `;
+      }
+      else if (toolId === 'bell') {
+        titleElem.textContent = '🔔 Attention Bell';
+        contentElem.innerHTML = `
+          <div class="big-display" style="cursor:pointer;" onclick="playSound('bell')">🔔</div>
+          <p style="margin-top: 2rem; color: #94a3b8;">Tap icon or button to chime</p>
+          <button class="control-btn" style="margin-top: 1rem;" onclick="playSound('bell')">Ring Bell</button>
+        `;
+      }
+      else if (toolId === 'timer') {
+        titleElem.textContent = '⏳ Countdown Timer';
+        contentElem.innerHTML = `
+          <div class="big-display" id="timerBigDisplay">${formatTime(timerSeconds * 1000)}</div>
+          
+          <div style="margin-top: 1.5rem; display: flex; gap: 0.5rem; justify-content: center;">
+            <button class="control-btn ${timerRunning ? 'danger' : ''}" onclick="toggleTimer()">${timerRunning ? 'Pause' : 'Start'}</button>
+            <button class="control-btn secondary" onclick="setTimerSecs(0)">Reset</button>
+          </div>
+
+          <div style="margin-top: 1.5rem; display: flex; gap: 0.4rem; flex-wrap: wrap; justify-content: center; max-width: 650px;">
+            <button class="control-btn preset" onclick="setTimerSecs(10)">10s</button>
+            <button class="control-btn preset" onclick="setTimerSecs(30)">30s</button>
+            <button class="control-btn preset" onclick="setTimerSecs(60)">1min</button>
+            <button class="control-btn preset" onclick="setTimerSecs(180)">3min</button>
+            <button class="control-btn preset" onclick="setTimerSecs(300)">5min</button>
+            <button class="control-btn preset" onclick="setTimerSecs(600)">10min</button>
+            <button class="control-btn preset" onclick="setTimerSecs(900)">15min</button>
+            <button class="control-btn preset" onclick="setTimerSecs(1200)">20min</button>
+          </div>
+
+          <div style="margin-top: 1.5rem; display: flex; gap: 0.5rem; align-items: center; justify-content: center; background: #1e293b; padding: 0.75rem 1.25rem; border-radius: 1rem; border: 1px solid #334155;">
+            <span style="font-size: 0.9rem; color: #94a3b8; margin-right: 0.25rem;">Custom:</span>
+            <input type="number" id="customMin" placeholder="Min" min="0" max="180" style="width: 80px; text-align: center;" />
+            <span style="font-weight: bold; color: #94a3b8;">:</span>
+            <input type="number" id="customSec" placeholder="Sec" min="0" max="59" style="width: 80px; text-align: center;" />
+            <button class="control-btn" style="font-size: 0.95rem; padding: 0.6rem 1.2rem; margin: 0 0 0 0.5rem;" onclick="setCustomTimer()">Set Duration</button>
+          </div>
+        `;
+      }
+      else if (toolId === 'stopwatch') {
+        titleElem.textContent = '⏱️ Stopwatch';
+        contentElem.innerHTML = `
+          <div class="big-display" id="stopwatchBigDisplay">${formatTime(stopwatchMs)}</div>
+          <div style="margin-top: 2rem;">
+            <button class="control-btn" onclick="toggleStopwatch()">${stopwatchRunning ? 'Stop' : 'Start'}</button>
+            <button class="control-btn secondary" onclick="resetStopwatch()">Reset</button>
+          </div>
+        `;
+      }
+      else if (toolId === 'traffic') {
+        titleElem.textContent = '🚦 Traffic Light';
+        contentElem.innerHTML = `
+          <div class="traffic-light-box">
+            <div class="light-bulb red ${currentLight==='red'?'active':''}" onclick="setLight('red')"></div>
+            <div class="light-bulb yellow ${currentLight==='yellow'?'active':''}" onclick="setLight('yellow')"></div>
+            <div class="light-bulb green ${currentLight==='green'?'active':''}" onclick="setLight('green')"></div>
+          </div>
+          <p style="margin-top: 2rem; font-size: 1.5rem; text-transform: uppercase;" id="lightStatus">
+            ${currentLight === 'red' ? 'Silence / Stop' : currentLight === 'yellow' ? 'Whisper / Transition' : 'Group Work / Go'}
+          </p>
+        `;
+      }
+      else if (toolId === 'groups') {
+        titleElem.textContent = '👥 Group Generator';
+        contentElem.innerHTML = `
+          <div class="interactive-list" id="groupListDisplay" style="min-height: 200px;">Tap a preset count to create random student groups</div>
+          
+          <div style="margin-top: 1.5rem; display: flex; gap: 0.4rem; flex-wrap: wrap; justify-content: center; max-width: 650px;">
+            <button class="control-btn preset" onclick="generateGroups(2)">2 Groups</button>
+            <button class="control-btn preset" onclick="generateGroups(3)">3 Groups</button>
+            <button class="control-btn preset" onclick="generateGroups(4)">4 Groups</button>
+            <button class="control-btn preset" onclick="generateGroups(5)">5 Groups</button>
+            <button class="control-btn preset" onclick="generateGroups(6)">6 Groups</button>
+            <button class="control-btn preset" onclick="generateGroups(7)">7 Groups</button>
+            <button class="control-btn preset" onclick="generateGroups(8)">8 Groups</button>
+            <button class="control-btn preset" onclick="generateGroups(9)">9 Groups</button>
+            <button class="control-btn preset" onclick="generateGroups(10)">10 Groups</button>
+          </div>
+        `;
+      }
+      else if (toolId === 'attendance') {
+        titleElem.textContent = '📋 Student Attendance';
+        let listHtml = roster.map((name) => `
+          <div class="list-item">
+            <span>${name}</span>
+            <button class="btn-close" style="font-size:0.8rem;" onclick="this.textContent = this.textContent === 'Present' ? 'Absent' : 'Present'">Present</button>
+          </div>
+        `).join('');
+        contentElem.innerHTML = `<div class="interactive-list">${listHtml}</div>`;
+      }
+      else if (toolId === 'seating') {
+        titleElem.textContent = '🪑 Seating Grid';
+        renderSeatingGrid(contentElem);
+      }
+      else if (toolId === 'notes') {
+        titleElem.textContent = '📝 Board Notes';
+        contentElem.innerHTML = `
+          <textarea style="height: 300px; max-width: 700px; font-size: 1.25rem; width:100%;" placeholder="Type lesson instructions or goals for the class here..."></textarea>
+        `;
+      }
+      else if (toolId === 'soundboard') {
+        titleElem.textContent = '🔊 Class Soundboard';
+        contentElem.innerHTML = `
+          <div>
+            <button class="control-btn" onclick="playSound('bell')">🔔 Bell</button>
+            <button class="control-btn" onclick="playSound('tada')">🎉 Ta-Da</button>
+            <button class="control-btn danger" onclick="playSound('buzzer')">🚨 Buzzer</button>
+          </div>
+        `;
+      }
+      else if (toolId === 'schedule') {
+        titleElem.textContent = '📅 Today\'s Schedule';
+        renderSchedule(contentElem);
+      }
+      else if (toolId === 'checklist') {
+        titleElem.textContent = '✅ Interactive Checklist';
+        renderChecklist(contentElem);
+      }
+      else if (toolId === 'bgMusic') {
+        titleElem.textContent = '🎵 Background Music Player';
+        renderBackgroundMusic(contentElem);
+      }
+    }
+
+    // --- NOISE METER LOGIC ---
+    async function toggleNoiseMic() {
+      if (!isNoiseActive) {
+        try {
+          initAudio();
+          micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          const source = audioCtx.createMediaStreamSource(micStream);
+          analyser = audioCtx.createAnalyser();
+          analyser.fftSize = 64;
+          source.connect(analyser);
+          isNoiseActive = true;
+          document.getElementById('gridNoiseLevel').textContent = 'ON';
+          document.getElementById('gridNoiseSubtext').textContent = 'LISTENING...';
+          startMicProcessing();
+        } catch(e) {
+          alert("Microphone access required for Noise Meter.");
+        }
+      } else {
+        isNoiseActive = false;
+        if (micStream) micStream.getTracks().forEach(t => t.stop());
+        document.getElementById('gridNoiseLevel').textContent = 'OFF';
+        document.getElementById('gridNoiseSubtext').textContent = 'TAP TO START MIC';
+        document.body.classList.remove('noise-alert-active');
+        const overlay = document.getElementById('fullscreenOverlay');
+        if (overlay) overlay.classList.remove('loud-alert-active');
+      }
+      if (activeToolId === 'noiseMeter') renderToolContent('noiseMeter', document.getElementById('overlayTitle'), document.getElementById('overlayContent'));
+    }
+
+    function updateSensitivity(val) {
+      noiseThreshold = val;
+      const line = document.getElementById('sensitivityLine');
+      if (line) line.style.left = val + '%';
+      const lbl = document.getElementById('threshVal');
+      if (lbl) lbl.textContent = val;
+    }
+
+    function startMicProcessing() {
+      if (!isNoiseActive || !analyser) return;
+      const data = new Uint8Array(analyser.frequencyBinCount);
+      analyser.getByteFrequencyData(data);
+      let sum = 0;
+      for (let i = 0; i < data.length; i++) sum += data[i];
+      const avg = sum / data.length;
+      const vol = Math.min(100, Math.round((avg / 120) * 100));
+
+      const fill = document.getElementById('noiseMeterFill');
+      const disp = document.getElementById('noiseVolumeDisplay');
+      const banner = document.getElementById('loudAlertMsg');
+      const overlay = document.getElementById('fullscreenOverlay');
+
+      if (fill) fill.style.width = vol + '%';
+      if (disp) disp.textContent = vol + '%';
+
+      if (vol > noiseThreshold) {
+        if (fill) fill.style.backgroundColor = '#ef4444';
+        document.body.classList.add('noise-alert-active');
+        if (banner) banner.style.display = 'block';
+        if (overlay && activeToolId === 'noiseMeter') overlay.classList.add('loud-alert-active');
+
+        // Trigger loud alarm tone (17.4 kHz high freq + adult chime) with 1.5-second cooldown
+        const now = Date.now();
+        if (now - lastNoiseAlertTime > 1500) {
+          playSound('loudAlert');
+          lastNoiseAlertTime = now;
+        }
+      } else {
+        if (fill) fill.style.backgroundColor = '#22c55e';
+        document.body.classList.remove('noise-alert-active');
+        if (banner) banner.style.display = 'none';
+        if (overlay) overlay.classList.remove('loud-alert-active');
+      }
+
+      if (isNoiseActive) requestAnimationFrame(startMicProcessing);
+    }
+
+    // --- TIME LOSS LOGIC ---
+    function toggleTimeLoss() {
+      if (timeLossRunning) {
+        timeLossRunning = false;
+        clearInterval(timeLossInterval);
+        timeLossTotalMs += (Date.now() - timeLossStartMark);
+        playSound('stop');
+        document.body.classList.remove('time-loss-active');
+      } else {
+        timeLossRunning = true;
+        timeLossStartMark = Date.now();
+        playSound('start');
+        document.body.classList.add('time-loss-active');
+        timeLossInterval = setInterval(updateTimeLoss, 200);
+      }
+      if (activeToolId === 'timeLoss') renderToolContent('timeLoss', document.getElementById('overlayTitle'), document.getElementById('overlayContent'));
+      updateTimeLossGrid();
+    }
+
+    function resetTimeLoss() {
+      timeLossTotalMs = 0;
+      if (timeLossRunning) timeLossStartMark = Date.now();
+      updateTimeLossGrid();
+      if (activeToolId === 'timeLoss') renderToolContent('timeLoss', document.getElementById('overlayTitle'), document.getElementById('overlayContent'));
+    }
+
+    function updateTimeLoss() {
+      const current = timeLossTotalMs + (timeLossRunning ? (Date.now() - timeLossStartMark) : 0);
+      const display = document.getElementById('timeLossBigDisplay');
+      if (display) display.textContent = formatTime(current);
+      updateTimeLossGrid();
+    }
+
+    function updateTimeLossGrid() {
+      const current = timeLossTotalMs + (timeLossRunning ? (Date.now() - timeLossStartMark) : 0);
+      document.getElementById('gridTimeLoss').textContent = formatTime(current);
+      document.getElementById('gridTimeLossStatus').textContent = timeLossRunning ? 'COUNTING...' : 'PAUSED';
+    }
+
+    // --- STUDENT PICKER LOGIC ---
+    function shuffleStudent() {
+      const disp = document.getElementById('pickerBigDisplay');
+      if (!disp) return;
+      let count = 0;
+      const interval = setInterval(() => {
+        disp.textContent = roster[Math.floor(Math.random() * roster.length)];
+        count++;
+        if (count > 12) {
+          clearInterval(interval);
+          playSound('tada');
+          document.getElementById('gridPicker').textContent = disp.textContent;
+        }
+      }, 80);
+    }
+
+    function editRosterPrompt() {
+      const input = prompt("Enter student names separated by commas:", roster.join(', '));
+      if (input) {
+        roster = input.split(',').map(s => s.trim()).filter(Boolean);
+        alert("Roster updated!");
+      }
+    }
+
+    // --- TIMER LOGIC ---
+    function toggleTimer() {
+      if (timerRunning) {
+        clearInterval(timerInterval);
+        timerRunning = false;
+      } else {
+        if (timerSeconds <= 0) return;
+        timerRunning = true;
+        timerInterval = setInterval(() => {
+          if (timerSeconds > 0) {
+            timerSeconds--;
+            const d = document.getElementById('timerBigDisplay');
+            if (d) d.textContent = formatTime(timerSeconds * 1000);
+            document.getElementById('gridTimer').textContent = formatTime(timerSeconds * 1000);
+          } else {
+            clearInterval(timerInterval);
+            timerRunning = false;
+            playSound('buzzer');
+          }
+        }, 1000);
+      }
+      if (activeToolId === 'timer') renderToolContent('timer', document.getElementById('overlayTitle'), document.getElementById('overlayContent'));
+    }
+
+    function setTimerSecs(s) {
+      if (timerRunning) {
+        clearInterval(timerInterval);
+        timerRunning = false;
+      }
+      timerSeconds = s;
+      const d = document.getElementById('timerBigDisplay');
+      if (d) d.textContent = formatTime(timerSeconds * 1000);
+      document.getElementById('gridTimer').textContent = formatTime(timerSeconds * 1000);
+      if (activeToolId === 'timer') renderToolContent('timer', document.getElementById('overlayTitle'), document.getElementById('overlayContent'));
+    }
+
+    function setCustomTimer() {
+      const minInput = document.getElementById('customMin');
+      const secInput = document.getElementById('customSec');
+      const m = parseInt(minInput ? minInput.value : 0) || 0;
+      const s = parseInt(secInput ? secInput.value : 0) || 0;
+      const totalSecs = (m * 60) + s;
+      setTimerSecs(totalSecs);
+    }
+
+    // --- STOPWATCH LOGIC ---
+    function toggleStopwatch() {
+      if (stopwatchRunning) {
+        clearInterval(stopwatchInterval);
+        stopwatchRunning = false;
+      } else {
+        stopwatchRunning = true;
+        const mark = Date.now() - stopwatchMs;
+        stopwatchInterval = setInterval(() => {
+          stopwatchMs = Date.now() - mark;
+          const d = document.getElementById('stopwatchBigDisplay');
+          if (d) d.textContent = formatTime(stopwatchMs);
+          document.getElementById('gridStopwatch').textContent = formatTime(stopwatchMs);
+        }, 200);
+      }
+      if (activeToolId === 'stopwatch') renderToolContent('stopwatch', document.getElementById('overlayTitle'), document.getElementById('overlayContent'));
+    }
+
+    function resetStopwatch() {
+      stopwatchMs = 0;
+      document.getElementById('gridStopwatch').textContent = '00:00';
+      if (activeToolId === 'stopwatch') renderToolContent('stopwatch', document.getElementById('overlayTitle'), document.getElementById('overlayContent'));
+    }
+
+    // --- TRAFFIC LIGHT LOGIC ---
+    function setLight(color) {
+      currentLight = color;
+      const icons = { red: '🔴', yellow: '🟡', green: '🟢' };
+      document.getElementById('gridTraffic').textContent = icons[color];
+      if (activeToolId === 'traffic') renderToolContent('traffic', document.getElementById('overlayTitle'), document.getElementById('overlayContent'));
+    }
+
+    // --- GROUPS LOGIC ---
+    function generateGroups(num) {
+      const shuffled = [...roster].sort(() => 0.5 - Math.random());
+      let html = '';
+      for (let i = 0; i < num; i++) {
+        html += `<div class="list-item"><b>Group ${i+1}</b><span>`;
+        const members = shuffled.filter((_, idx) => idx % num === i);
+        html += (members.length > 0 ? members.join(', ') : 'Empty') + `</span></div>`;
+      }
+      const container = document.getElementById('groupListDisplay');
+      if (container) container.innerHTML = html;
+      document.getElementById('gridGroupText').textContent = `${num} Groups`;
+    }
+
+    // --- SEATING GRID LOGIC ---
+    function renderSeatingGrid(container) {
+      let html = `
+        <div style="margin-bottom: 1.5rem; display: flex; gap: 1rem; align-items: center; justify-content: center; background: #1e293b; padding: 0.75rem 1.25rem; border-radius: 1rem; border: 1px solid #334155;">
+          <label style="color:#94a3b8; font-size:0.9rem;">Rows: 
+            <input type="number" id="seatRowsInput" value="${seatingRows}" min="1" max="10" style="width:65px; text-align:center; margin-left:0.25rem;" />
+          </label>
+          <span style="color:#94a3b8;">x</span>
+          <label style="color:#94a3b8; font-size:0.9rem;">Cols: 
+            <input type="number" id="seatColsInput" value="${seatingCols}" min="1" max="10" style="width:65px; text-align:center; margin-left:0.25rem;" />
+          </label>
+          <button class="control-btn" style="font-size: 0.9rem; padding: 0.5rem 1rem;" onclick="updateSeatingGridDimensions()">Set Grid</button>
+        </div>
+
+        <div style="display:grid; grid-template-columns: repeat(${seatingCols}, 1fr); gap:0.75rem; width:100%; max-width:700px; max-height:350px; overflow-y:auto; padding: 0.5rem;">
+      `;
+
+      const totalDesks = seatingRows * seatingCols;
+      for (let i = 0; i < totalDesks; i++) {
+        html += `
+          <div style="background:#1e293b; padding:0.8rem; border-radius:0.5rem; text-align:center; border:1px solid #334155; font-size:0.85rem;">
+            Desk ${i+1}<br>
+            <strong style="color:#38bdf8; display:block; margin-top:0.25rem;">${roster[i] || 'Empty'}</strong>
+          </div>
+        `;
+      }
+      html += `</div>`;
+      container.innerHTML = html;
+      document.getElementById('gridSeatingDimensions').textContent = `${seatingRows}x${seatingCols}`;
+    }
+
+    function updateSeatingGridDimensions() {
+      const r = parseInt(document.getElementById('seatRowsInput').value) || 1;
+      const c = parseInt(document.getElementById('seatColsInput').value) || 1;
+      seatingRows = Math.max(1, Math.min(10, r));
+      seatingCols = Math.max(1, Math.min(10, c));
+      renderToolContent('seating', document.getElementById('overlayTitle'), document.getElementById('overlayContent'));
+    }
+
+    // --- SCHEDULE LOGIC ---
+    function renderSchedule(container) {
+      let html = `
+        <div style="margin-bottom: 1rem; display: flex; gap: 0.5rem; width: 100%; max-width: 650px;">
+          <input type="text" id="newScheduleTime" placeholder="e.g. 09:00 AM" style="width: 140px;" />
+          <input type="text" id="newScheduleActivity" placeholder="Activity name..." style="flex: 1;" onkeypress="if(event.key==='Enter') addScheduleItem()" />
+          <button class="control-btn" style="font-size: 0.95rem; padding: 0.6rem 1.2rem; margin: 0;" onclick="addScheduleItem()">+ Add Task</button>
+        </div>
+        <div class="interactive-list">
+      `;
+
+      scheduleData.forEach((item, idx) => {
+        html += `
+          <div class="list-item">
+            <input type="text" value="${item.time}" onchange="updateScheduleItem(${idx}, 'time', this.value)" style="width: 110px; background: #0f172a; border: 1px solid #334155; color: #38bdf8; font-weight: bold; border-radius: 0.4rem; padding: 0.4rem 0.6rem; text-align: center;" />
+            <input type="text" value="${item.activity}" onchange="updateScheduleItem(${idx}, 'activity', this.value)" style="flex: 1; background: transparent; border: none; color: #fff; font-size: 1rem;" />
+            <button class="btn-close" style="padding: 0.2rem 0.6rem; font-size: 0.8rem;" onclick="removeScheduleItem(${idx})">✕</button>
+          </div>
+        `;
+      });
+
+      html += `</div>`;
+      container.innerHTML = html;
+      updateScheduleGrid();
+    }
+
+    function addScheduleItem() {
+      const timeInput = document.getElementById('newScheduleTime');
+      const actInput = document.getElementById('newScheduleActivity');
+      if (!actInput || !actInput.value.trim()) return;
+
+      const timeVal = (timeInput && timeInput.value.trim()) ? timeInput.value.trim() : '00:00';
+      scheduleData.push({ id: Date.now(), time: timeVal, activity: actInput.value.trim() });
+      if (activeToolId === 'schedule') renderSchedule(document.getElementById('overlayContent'));
+      updateScheduleGrid();
+    }
+
+    function updateScheduleItem(idx, field, val) {
+      if (scheduleData[idx]) {
+        scheduleData[idx][field] = val;
+      }
+    }
+
+    function removeScheduleItem(idx) {
+      scheduleData.splice(idx, 1);
+      if (activeToolId === 'schedule') renderSchedule(document.getElementById('overlayContent'));
+      updateScheduleGrid();
+    }
+
+    function updateScheduleGrid() {
+      const gridElem = document.getElementById('gridScheduleCount');
+      if (gridElem) gridElem.textContent = `${scheduleData.length} Tasks`;
+    }
+
+    // --- CHECKLIST LOGIC ---
+    function renderChecklist(container) {
+      let html = `
+        <div style="margin-bottom: 1rem; display: flex; gap: 0.5rem; width: 100%; max-width: 650px;">
+          <input type="text" id="newCheckitemText" placeholder="Add new checklist task..." style="flex: 1;" onkeypress="if(event.key==='Enter') addChecklistItem()" />
+          <button class="control-btn" style="font-size: 0.95rem; padding: 0.6rem 1.2rem; margin: 0;" onclick="addChecklistItem()">+ Add List Item</button>
+        </div>
+        <div class="interactive-list">
+      `;
+
+      checklist.forEach((item, idx) => {
+        html += `
+          <div class="list-item">
+            <input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggleCheck(${idx})" style="width: 20px; height: 20px; cursor: pointer; accent-color: #38bdf8;" />
+            <input type="text" value="${item.text}" onchange="updateChecklistText(${idx}, this.value)" style="flex:1; background:transparent; border:none; color:#fff; font-size:1rem; ${item.done ? 'text-decoration: line-through; opacity: 0.5;' : ''}" />
+            <button class="btn-close" style="padding: 0.2rem 0.6rem; font-size: 0.8rem;" onclick="removeChecklistItem(${idx})">✕</button>
+          </div>
+        `;
+      });
+
+      html += `</div>`;
+      container.innerHTML = html;
+      updateChecklistGrid();
+    }
+
+    function toggleCheck(idx) {
+      checklist[idx].done = !checklist[idx].done;
+      updateChecklistGrid();
+      if (activeToolId === 'checklist') renderToolContent('checklist', document.getElementById('overlayTitle'), document.getElementById('overlayContent'));
+    }
+
+    function updateChecklistText(idx, val) {
+      checklist[idx].text = val;
+    }
+
+    function addChecklistItem() {
+      const input = document.getElementById('newCheckitemText');
+      if (!input || !input.value.trim()) return;
+      checklist.push({ id: Date.now(), text: input.value.trim(), done: false });
+      input.value = '';
+      if (activeToolId === 'checklist') renderToolContent('checklist', document.getElementById('overlayTitle'), document.getElementById('overlayContent'));
+      updateChecklistGrid();
+    }
+
+    function removeChecklistItem(idx) {
+      checklist.splice(idx, 1);
+      if (activeToolId === 'checklist') renderToolContent('checklist', document.getElementById('overlayTitle'), document.getElementById('overlayContent'));
+      updateChecklistGrid();
+    }
+
+    function updateChecklistGrid() {
+      const count = checklist.filter(c => c.done).length;
+      document.getElementById('gridChecklist').textContent = `${count}/${checklist.length}`;
+    }
+
+    // --- BACKGROUND MUSIC LOGIC ---
+    function renderBackgroundMusic(container) {
+      const tracks = {
+        "Hype": [
+          "Hype Track 1", 
+          "Hype Track 2", 
+          "Hype Track 3", 
+          "Hype Track 4", 
+          "Hype Track 5"
+        ],
+        "Focus": [
+          "Focus Track 1", 
+          "Focus Track 2", 
+          "Focus Track 3", 
+          "Focus Track 4", 
+          "Focus Track 5"
+        ]
+      };
+
+      let html = `
+        <div style="margin-bottom: 1.5rem; text-align: center;">
+          <p style="font-size: 1.25rem; color: #38bdf8; font-weight: 700; margin-bottom: 0.5rem;">
+            ${isMusicPlaying ? `▶️ Playing: ${currentMusicTrackName} (${currentMusicCategory})` : '⏹️ Music Stopped'}
+          </p>
+          <div style="display: flex; gap: 1rem; align-items: center; justify-content: center;">
+            <button class="control-btn danger" onclick="stopBgMusic()">Stop Music</button>
+            <label style="color:#94a3b8; font-size:0.9rem;">Volume: 
+              <input type="range" min="0" max="1" step="0.05" value="0.3" oninput="setMusicVolume(this.value)" style="width: 120px;" />
+            </label>
+          </div>
+        </div>
+        <div class="music-grid">
+      `;
+
+      for (let cat in tracks) {
+        html += `<div class="music-card"><div class="music-card-title">${cat}</div>`;
+        tracks[cat].forEach(track => {
+          const active = isMusicPlaying && currentMusicTrackName === track;
+          html += `
+            <button class="control-btn preset" style="width:100%; margin:0.2rem 0; text-align:left; ${active ? 'background:#38bdf8; color:#0f172a; font-weight:bold;' : ''}" 
+              onclick="playBgMusic('${cat}', '${track}')">
+              ${active ? '▶ ' : '🎵 '}${track}
+            </button>
+          `;
+        });
+        html += `</div>`;
+      }
+
+      html += `</div>`;
+      container.innerHTML = html;
+    }
+
+    function stopBgMusic() {
+      musicAudioNodes.forEach(node => { try { node.stop(); node.disconnect(); } catch(e){} });
+      musicAudioNodes = [];
+      isMusicPlaying = false;
+      currentMusicCategory = null;
+      currentMusicTrackName = null;
+      document.getElementById('gridMusicStatus').textContent = '🎵';
+      document.getElementById('gridMusicSubtext').textContent = 'STOPPED';
+      if (activeToolId === 'bgMusic') renderToolContent('bgMusic', document.getElementById('overlayTitle'), document.getElementById('overlayContent'));
+    }
+
+    function setMusicVolume(val) {
+      if (musicGainNode) musicGainNode.gain.setValueAtTime(parseFloat(val), audioCtx.currentTime);
+    }
+
+    function playBgMusic(category, trackName) {
+      stopBgMusic();
+      initAudio();
+
+      isMusicPlaying = true;
+      currentMusicCategory = category;
+      currentMusicTrackName = trackName;
+
+      musicGainNode = audioCtx.createGain();
+      musicGainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+      musicGainNode.connect(audioCtx.destination);
+
+      // Extract numeric track index (0 to 4)
+      const trackNum = parseInt(trackName.replace(/\D/g, '')) || 1;
+      const trackIdx = Math.max(0, Math.min(4, trackNum - 1));
+
+      if (category === 'Hype') {
+        const hypeFreqSets = [
+          [261.63, 329.63, 392.00, 523.25], // Track 1: C Major
+          [293.66, 369.99, 440.00, 587.33], // Track 2: D Major
+          [329.63, 415.30, 493.88, 659.25], // Track 3: E Major
+          [349.23, 440.00, 523.25, 698.46], // Track 4: F Major
+          [392.00, 493.88, 587.33, 783.99]  // Track 5: G Major
+        ];
+        const freqs = hypeFreqSets[trackIdx];
+        let idx = 0;
+        const interval = setInterval(() => {
+          if (!isMusicPlaying) return clearInterval(interval);
+          const osc = audioCtx.createOscillator();
+          const g = audioCtx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.value = freqs[idx % freqs.length];
+          g.gain.setValueAtTime(0.15, audioCtx.currentTime);
+          g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
+          osc.connect(g); g.connect(musicGainNode);
+          osc.start(); osc.stop(audioCtx.currentTime + 0.2);
+          idx++;
+        }, 180);
+      } 
+      else if (category === 'Focus') {
+        const focusFreqSets = [
+          [196.00, 246.94, 293.66], // Track 1: G Major Ambient
+          [220.00, 261.63, 329.63], // Track 2: A Minor Ambient
+          [174.61, 220.00, 261.63], // Track 3: F Major Ambient
+          [261.63, 329.63, 392.00], // Track 4: C Major Ambient
+          [293.66, 349.23, 440.00]  // Track 5: D Minor Ambient
+        ];
+        const freqs = focusFreqSets[trackIdx];
+        let idx = 0;
+        const interval = setInterval(() => {
+          if (!isMusicPlaying) return clearInterval(interval);
+          const osc = audioCtx.createOscillator();
+          const g = audioCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.value = freqs[idx % freqs.length];
+          g.gain.setValueAtTime(0.1, audioCtx.currentTime);
+          g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.6);
+          osc.connect(g); g.connect(musicGainNode);
+          osc.start(); osc.stop(audioCtx.currentTime + 0.6);
+          idx++;
+        }, 500);
+      }
+
+      document.getElementById('gridMusicStatus').textContent = '▶️';
+      document.getElementById('gridMusicSubtext').textContent = trackName;
+      if (activeToolId === 'bgMusic') renderToolContent('bgMusic', document.getElementById('overlayTitle'), document.getElementById('overlayContent'));
+    }
+
+    // --- UTILS ---
+    function formatTime(ms) {
+      const totalSec = Math.floor(ms / 1000);
+      const m = Math.floor(totalSec / 60);
+      const s = totalSec % 60;
+      return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    }
+  </script>
+</body>
+</html>
