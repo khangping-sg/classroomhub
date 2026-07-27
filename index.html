@@ -55,6 +55,14 @@
       align-items: center;
       border-bottom: 2px solid var(--ptps-card-border);
       padding-bottom: 1rem;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    .header-title-group {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
     }
 
     h1 {
@@ -71,6 +79,12 @@
       color: var(--ptps-turquoise);
     }
 
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
     .badge {
       background: var(--ptps-card-bg);
       border: 1px solid var(--ptps-turquoise);
@@ -81,7 +95,24 @@
       font-weight: 500;
     }
 
-    /* Grid Layout */
+    .btn-reset-layout {
+      background: var(--ptps-card-bg);
+      border: 1px solid var(--ptps-card-border);
+      color: var(--ptps-gray);
+      padding: 0.4rem 0.9rem;
+      border-radius: 2rem;
+      font-size: 0.825rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .btn-reset-layout:hover {
+      color: var(--ptps-text-light);
+      border-color: var(--ptps-turquoise);
+      background: rgba(0, 164, 153, 0.1);
+    }
+
+    /* Dashboard Grid Layout */
     .dashboard-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
@@ -90,7 +121,7 @@
       margin: 0 auto;
     }
 
-    /* Tile Styling */
+    /* Dashboard Tile Drag-and-Drop Styling */
     .tile {
       background: var(--ptps-card-bg);
       border: 1px solid var(--ptps-card-border);
@@ -100,16 +131,31 @@
       flex-direction: column;
       justify-content: space-between;
       min-height: 180px;
-      cursor: pointer;
+      cursor: grab;
       user-select: none;
-      transition: transform 0.15s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+      transition: transform 0.15s ease, border-color 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
       position: relative;
+    }
+
+    .tile:active {
+      cursor: grabbing;
     }
 
     .tile:hover {
       transform: translateY(-3px);
       border-color: var(--ptps-turquoise);
       box-shadow: 0 10px 20px -5px rgba(0, 164, 153, 0.3);
+    }
+
+    .tile.grid-dragging {
+      opacity: 0.4;
+      border-color: var(--ptps-lime);
+    }
+
+    .tile.grid-drag-over {
+      border-color: var(--ptps-lime);
+      background: rgba(120, 190, 32, 0.12);
+      transform: scale(1.03);
     }
 
     .tile-header {
@@ -126,6 +172,13 @@
       align-items: center;
       gap: 0.5rem;
       color: var(--ptps-text-light);
+    }
+
+    .drag-handle-icon {
+      font-size: 0.9rem;
+      color: var(--ptps-gray);
+      margin-right: 0.2rem;
+      opacity: 0.6;
     }
 
     .tile-expand-icon {
@@ -409,21 +462,24 @@
     .music-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 1rem;
+      gap: 1.25rem;
       width: 100%;
-      max-width: 750px;
+      max-width: 800px;
     }
     .music-card {
       background: var(--ptps-card-bg);
       border: 1px solid var(--ptps-card-border);
-      padding: 1rem;
-      border-radius: 0.75rem;
+      padding: 1.25rem;
+      border-radius: 0.85rem;
     }
     .music-card-title {
       font-weight: 700;
       color: var(--ptps-turquoise);
-      margin-bottom: 0.5rem;
-      font-size: 1.1rem;
+      margin-bottom: 0.75rem;
+      font-size: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
     }
 
     /* Form Controls */
@@ -446,191 +502,18 @@
 <body>
 
   <header>
-    <h1>PTPS <span>Classroom Hub</span></h1>
-    <div class="badge">Pei Tong Primary School</div>
+    <div class="header-title-group">
+      <h1>PTPS <span>Classroom Hub</span></h1>
+      <div class="badge">Pei Tong Primary School</div>
+    </div>
+    <div class="header-controls">
+      <button class="btn-reset-layout" onclick="resetTileOrder()">⇄ Reset Grid Layout</button>
+    </div>
   </header>
 
-  <!-- DASHBOARD GRID -->
-  <div class="dashboard-grid">
-    <!-- 1. TIME LOSS TOOL -->
-    <div class="tile tile-time-loss" onclick="openTool('timeLoss')">
-      <div class="tile-header">
-        <span class="tile-title">⏱️ Time Loss</span>
-        <span class="tile-expand-icon">⤢ Fullscreen</span>
-      </div>
-      <div class="tile-body">
-        <div class="display-main" id="gridTimeLoss">00:00</div>
-        <div class="tile-subtext" id="gridTimeLossStatus">TAP TO START</div>
-      </div>
-    </div>
-
-    <!-- 2. NOISE METER -->
-    <div class="tile" onclick="openTool('noiseMeter')">
-      <div class="tile-header">
-        <span class="tile-title">🎤 Noise Meter</span>
-        <span class="tile-expand-icon">⤢ Fullscreen</span>
-      </div>
-      <div class="tile-body">
-        <div class="display-main" id="gridNoiseLevel">OFF</div>
-        <div class="tile-subtext" id="gridNoiseSubtext">TAP TO START MIC</div>
-      </div>
-    </div>
-
-    <!-- 3. STUDENT PICKER -->
-    <div class="tile" onclick="openTool('picker')">
-      <div class="tile-header">
-        <span class="tile-title">🎲 Random Picker</span>
-        <span class="tile-expand-icon">⤢ Fullscreen</span>
-      </div>
-      <div class="tile-body">
-        <div class="display-main" id="gridPicker">Pick</div>
-        <div class="tile-subtext">SELECT STUDENT</div>
-      </div>
-    </div>
-
-    <!-- 4. BELL / CHIME -->
-    <div class="tile" onclick="openTool('bell')">
-      <div class="tile-header">
-        <span class="tile-title">🔔 Classroom Bell</span>
-        <span class="tile-expand-icon">⤢ Fullscreen</span>
-      </div>
-      <div class="tile-body">
-        <div class="display-main">🔔</div>
-        <div class="tile-subtext">ATTENTION CHIME</div>
-      </div>
-    </div>
-
-    <!-- 5. COUNTDOWN TIMER -->
-    <div class="tile" onclick="openTool('timer')">
-      <div class="tile-header">
-        <span class="tile-title">⏳ Countdown Timer</span>
-        <span class="tile-expand-icon">⤢ Fullscreen</span>
-      </div>
-      <div class="tile-body">
-        <div class="display-main" id="gridTimer">05:00</div>
-        <div class="tile-subtext">COUNTDOWN</div>
-      </div>
-    </div>
-
-    <!-- 6. STOPWATCH -->
-    <div class="tile" onclick="openTool('stopwatch')">
-      <div class="tile-header">
-        <span class="tile-title">⏱️ Stopwatch</span>
-        <span class="tile-expand-icon">⤢ Fullscreen</span>
-      </div>
-      <div class="tile-body">
-        <div class="display-main" id="gridStopwatch">00:00</div>
-        <div class="tile-subtext">ELAPSED TIME</div>
-      </div>
-    </div>
-
-    <!-- 7. TRAFFIC LIGHT -->
-    <div class="tile" onclick="openTool('traffic')">
-      <div class="tile-header">
-        <span class="tile-title">🚦 Traffic Light</span>
-        <span class="tile-expand-icon">⤢ Fullscreen</span>
-      </div>
-      <div class="tile-body">
-        <div class="display-main" id="gridTraffic">🔴</div>
-        <div class="tile-subtext">WORK STATE</div>
-      </div>
-    </div>
-
-    <!-- 8. GROUP MAKER -->
-    <div class="tile" onclick="openTool('groups')">
-      <div class="tile-header">
-        <span class="tile-title">👥 Group Maker</span>
-        <span class="tile-expand-icon">⤢ Fullscreen</span>
-      </div>
-      <div class="tile-body">
-        <div class="display-main" id="gridGroupText">4 Groups</div>
-        <div class="tile-subtext">SHUFFLE TEAMS</div>
-      </div>
-    </div>
-
-    <!-- 9. ATTENDANCE -->
-    <div class="tile" onclick="openTool('attendance')">
-      <div class="tile-header">
-        <span class="tile-title">📋 Attendance</span>
-        <span class="tile-expand-icon">⤢ Fullscreen</span>
-      </div>
-      <div class="tile-body">
-        <div class="display-main" id="gridAttendance">100%</div>
-        <div class="tile-subtext">PRESENT</div>
-      </div>
-    </div>
-
-    <!-- 10. SEATING CHART -->
-    <div class="tile" onclick="openTool('seating')">
-      <div class="tile-header">
-        <span class="tile-title">🪑 Seating Grid</span>
-        <span class="tile-expand-icon">⤢ Fullscreen</span>
-      </div>
-      <div class="tile-body">
-        <div class="display-main" id="gridSeatingDimensions">4x4</div>
-        <div class="tile-subtext">DRAG & DROP ARRANGEMENT</div>
-      </div>
-    </div>
-
-    <!-- 11. NOTES -->
-    <div class="tile" onclick="openTool('notes')">
-      <div class="tile-header">
-        <span class="tile-title">📝 Quick Notes</span>
-        <span class="tile-expand-icon">⤢ Fullscreen</span>
-      </div>
-      <div class="tile-body">
-        <div class="display-main">📄</div>
-        <div class="tile-subtext">BOARD NOTES</div>
-      </div>
-    </div>
-
-    <!-- 12. SOUNDBOARD -->
-    <div class="tile" onclick="openTool('soundboard')">
-      <div class="tile-header">
-        <span class="tile-title">🔊 Soundboard</span>
-        <span class="tile-expand-icon">⤢ Fullscreen</span>
-      </div>
-      <div class="tile-body">
-        <div class="display-main">🎶</div>
-        <div class="tile-subtext">SFX EFFECTS</div>
-      </div>
-    </div>
-
-    <!-- 13. SCHEDULE -->
-    <div class="tile" onclick="openTool('schedule')">
-      <div class="tile-header">
-        <span class="tile-title">📅 Schedule</span>
-        <span class="tile-expand-icon">⤢ Fullscreen</span>
-      </div>
-      <div class="tile-body">
-        <div class="display-main" id="gridScheduleCount">3 Tasks</div>
-        <div class="tile-subtext">LESSON PLAN</div>
-      </div>
-    </div>
-
-    <!-- 14. CHECKLIST -->
-    <div class="tile" onclick="openTool('checklist')">
-      <div class="tile-header">
-        <span class="tile-title">✅ Checklist</span>
-        <span class="tile-expand-icon">⤢ Fullscreen</span>
-      </div>
-      <div class="tile-body">
-        <div class="display-main" id="gridChecklist">0/3</div>
-        <div class="tile-subtext">DONE</div>
-      </div>
-    </div>
-
-    <!-- 15. BACKGROUND MUSIC -->
-    <div class="tile" onclick="openTool('bgMusic')">
-      <div class="tile-header">
-        <span class="tile-title">🎵 Background Music</span>
-        <span class="tile-expand-icon">⤢ Fullscreen</span>
-      </div>
-      <div class="tile-body">
-        <div class="display-main" id="gridMusicStatus">🎵</div>
-        <div class="tile-subtext" id="gridMusicSubtext">CLASSROOM SOUNDS</div>
-      </div>
-    </div>
+  <!-- DASHBOARD DYNAMIC GRID CONTAINER -->
+  <div class="dashboard-grid" id="dashboardGridContainer">
+    <!-- Rendered dynamically by JavaScript to support Drag and Drop Layout Reordering -->
   </div>
 
   <!-- FULLSCREEN OVERLAY MODAL -->
@@ -645,7 +528,7 @@
   </div>
 
   <script>
-    // --- AUDIO SYNTHESIZER ---
+    // --- AUDIO SYNTHESIZER FOR SFX & BELLS ---
     let audioCtx = null;
     function initAudio() {
       if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -758,9 +641,9 @@
     let currentLight = 'red';
 
     // Attendance State
-    let attendanceStatus = {}; // { studentName: boolean (true = present, false = absent) }
+    let attendanceStatus = {};
 
-    // Seating Grid State & Drag-and-Drop
+    // Seating Grid State
     let seatingRows = 4;
     let seatingCols = 4;
     let seatingArrangement = [];
@@ -780,12 +663,233 @@
       { id: 3, time: "10:15 AM", activity: "Reflection & Quiz" }
     ];
 
-    // Background Music State
+    // --- BACKGROUND MUSIC STATE (REAL AUDIO LOOPS) ---
+    const bgMusicCatalog = {
+      "Hype": [
+        { name: "Hype Track 1", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" },
+        { name: "Hype Track 2", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" },
+        { name: "Hype Track 3", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3" },
+        { name: "Hype Track 4", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3" },
+        { name: "Hype Track 5", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3" }
+      ],
+      "Focus": [
+        { name: "Focus Track 1", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3" },
+        { name: "Focus Track 2", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-10.mp3" },
+        { name: "Focus Track 3", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-12.mp3" },
+        { name: "Focus Track 4", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-15.mp3" },
+        { name: "Focus Track 5", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-16.mp3" }
+      ]
+    };
+
+    let bgAudioPlayer = new Audio();
+    bgAudioPlayer.loop = true; // Loop audio continuously
+    let isMusicPlaying = false;
     let currentMusicCategory = null;
     let currentMusicTrackName = null;
-    let musicAudioNodes = [];
-    let musicGainNode = null;
-    let isMusicPlaying = false;
+    let musicVolume = 0.4;
+    bgAudioPlayer.volume = musicVolume;
+
+    // --- MAIN DASHBOARD DRAG & DROP TILE ORDER ---
+    const defaultTileOrder = [
+      'timeLoss', 'noiseMeter', 'picker', 'bell', 'timer',
+      'stopwatch', 'traffic', 'groups', 'attendance', 'seating',
+      'notes', 'soundboard', 'schedule', 'checklist', 'bgMusic'
+    ];
+
+    let tileOrder = [...defaultTileOrder];
+    let draggedTileId = null;
+    let isTileDragging = false;
+
+    function loadSavedTileOrder() {
+      try {
+        const saved = localStorage.getItem('ptps_hub_tile_order');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length === defaultTileOrder.length) {
+            tileOrder = parsed;
+          }
+        }
+      } catch(e) {}
+    }
+
+    function saveTileOrder() {
+      try {
+        localStorage.setItem('ptps_hub_tile_order', JSON.stringify(tileOrder));
+      } catch(e) {}
+    }
+
+    function resetTileOrder() {
+      tileOrder = [...defaultTileOrder];
+      saveTileOrder();
+      renderDashboardGrid();
+    }
+
+    // Tool metadata definitions for dynamic grid rendering
+    const toolDefinitions = {
+      timeLoss: {
+        title: "⏱️ Time Loss",
+        extraClass: "tile-time-loss",
+        getDisplay: () => formatTime(timeLossTotalMs),
+        getSubtext: () => timeLossRunning ? "COUNTING..." : "TAP TO START"
+      },
+      noiseMeter: {
+        title: "🎤 Noise Meter",
+        getDisplay: () => isNoiseActive ? "ON" : "OFF",
+        getSubtext: () => isNoiseActive ? "LISTENING..." : "TAP TO START MIC"
+      },
+      picker: {
+        title: "🎲 Random Picker",
+        getDisplay: () => document.getElementById('pickerBigDisplay') ? document.getElementById('pickerBigDisplay').textContent : "Pick",
+        getSubtext: () => "SELECT STUDENT"
+      },
+      bell: {
+        title: "🔔 Classroom Bell",
+        getDisplay: () => "🔔",
+        getSubtext: () => "ATTENTION CHIME"
+      },
+      timer: {
+        title: "⏳ Countdown Timer",
+        getDisplay: () => formatTime(timerSeconds * 1000),
+        getSubtext: () => "COUNTDOWN"
+      },
+      stopwatch: {
+        title: "⏱️ Stopwatch",
+        getDisplay: () => formatTime(stopwatchMs),
+        getSubtext: () => "ELAPSED TIME"
+      },
+      traffic: {
+        title: "🚦 Traffic Light",
+        getDisplay: () => ({ red: '🔴', yellow: '🟡', green: '🟢' }[currentLight]),
+        getSubtext: () => "WORK STATE"
+      },
+      groups: {
+        title: "👥 Group Maker",
+        getDisplay: () => "4 Groups",
+        getSubtext: () => "SHUFFLE TEAMS"
+      },
+      attendance: {
+        title: "📋 Attendance",
+        getDisplay: () => {
+          initAttendance();
+          const p = roster.filter(n => attendanceStatus[n] !== false).length;
+          const pct = roster.length > 0 ? Math.round((p / roster.length) * 100) : 100;
+          return `${pct}%`;
+        },
+        getSubtext: () => "PRESENT"
+      },
+      seating: {
+        title: "🪑 Seating Grid",
+        getDisplay: () => `${seatingRows}x${seatingCols}`,
+        getSubtext: () => "DRAG & DROP DESKS"
+      },
+      notes: {
+        title: "📝 Quick Notes",
+        getDisplay: () => "📄",
+        getSubtext: () => "BOARD NOTES"
+      },
+      soundboard: {
+        title: "🔊 Soundboard",
+        getDisplay: () => "🎶",
+        getSubtext: () => "SFX EFFECTS"
+      },
+      schedule: {
+        title: "📅 Schedule",
+        getDisplay: () => `${scheduleData.length} Tasks`,
+        getSubtext: () => "LESSON PLAN"
+      },
+      checklist: {
+        title: "✅ Checklist",
+        getDisplay: () => `${checklist.filter(c => c.done).length}/${checklist.length}`,
+        getSubtext: () => "DONE"
+      },
+      bgMusic: {
+        title: "🎵 Background Music",
+        getDisplay: () => isMusicPlaying ? "▶️" : "🎵",
+        getSubtext: () => isMusicPlaying ? currentMusicTrackName : "REAL MUSIC LOOPS"
+      }
+    };
+
+    function renderDashboardGrid() {
+      const container = document.getElementById('dashboardGridContainer');
+      if (!container) return;
+
+      container.innerHTML = '';
+      tileOrder.forEach(toolId => {
+        const def = toolDefinitions[toolId];
+        if (!def) return;
+
+        const tileEl = document.createElement('div');
+        tileEl.className = `tile ${def.extraClass || ''}`;
+        tileEl.setAttribute('draggable', 'true');
+        tileEl.setAttribute('data-id', toolId);
+
+        tileEl.innerHTML = `
+          <div class="tile-header">
+            <span class="tile-title"><span class="drag-handle-icon">⋮⋮</span> ${def.title}</span>
+            <span class="tile-expand-icon">⤢ Fullscreen</span>
+          </div>
+          <div class="tile-body">
+            <div class="display-main" id="grid_${toolId}_display">${def.getDisplay()}</div>
+            <div class="tile-subtext" id="grid_${toolId}_subtext">${def.getSubtext()}</div>
+          </div>
+        `;
+
+        // Drag events for reordering dashboard tiles
+        tileEl.addEventListener('dragstart', (e) => handleGridDragStart(e, toolId));
+        tileEl.addEventListener('dragover', (e) => handleGridDragOver(e));
+        tileEl.addEventListener('dragleave', (e) => handleGridDragLeave(e));
+        tileEl.addEventListener('drop', (e) => handleGridDrop(e, toolId));
+        tileEl.addEventListener('dragend', (e) => handleGridDragEnd(e));
+
+        // Click event to open tool fullscreen
+        tileEl.addEventListener('click', () => {
+          if (!isTileDragging) openTool(toolId);
+        });
+
+        container.appendChild(tileEl);
+      });
+    }
+
+    function handleGridDragStart(e, toolId) {
+      draggedTileId = toolId;
+      isTileDragging = true;
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', toolId);
+      e.currentTarget.classList.add('grid-dragging');
+    }
+
+    function handleGridDragOver(e) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      e.currentTarget.classList.add('grid-drag-over');
+    }
+
+    function handleGridDragLeave(e) {
+      e.currentTarget.classList.remove('grid-drag-over');
+    }
+
+    function handleGridDrop(e, targetToolId) {
+      e.preventDefault();
+      e.currentTarget.classList.remove('grid-drag-over');
+
+      if (draggedTileId && draggedTileId !== targetToolId) {
+        const fromIdx = tileOrder.indexOf(draggedTileId);
+        const toIdx = tileOrder.indexOf(targetToolId);
+        if (fromIdx > -1 && toIdx > -1) {
+          tileOrder.splice(fromIdx, 1);
+          tileOrder.splice(toIdx, 0, draggedTileId);
+          saveTileOrder();
+          renderDashboardGrid();
+        }
+      }
+      draggedTileId = null;
+    }
+
+    function handleGridDragEnd(e) {
+      e.currentTarget.classList.remove('grid-dragging');
+      document.querySelectorAll('.tile').forEach(t => t.classList.remove('grid-drag-over'));
+      setTimeout(() => { isTileDragging = false; }, 60);
+    }
 
     // --- FULLSCREEN CONTROLLER ---
     function openTool(toolId) {
@@ -978,8 +1082,8 @@
           analyser.fftSize = 64;
           source.connect(analyser);
           isNoiseActive = true;
-          document.getElementById('gridNoiseLevel').textContent = 'ON';
-          document.getElementById('gridNoiseSubtext').textContent = 'LISTENING...';
+          
+          updateTileDisplay('noiseMeter');
           startMicProcessing();
         } catch(e) {
           alert("Microphone access required for Noise Meter.");
@@ -987,8 +1091,7 @@
       } else {
         isNoiseActive = false;
         if (micStream) micStream.getTracks().forEach(t => t.stop());
-        document.getElementById('gridNoiseLevel').textContent = 'OFF';
-        document.getElementById('gridNoiseSubtext').textContent = 'TAP TO START MIC';
+        updateTileDisplay('noiseMeter');
         document.body.classList.remove('noise-alert-active');
         const overlay = document.getElementById('fullscreenOverlay');
         if (overlay) overlay.classList.remove('loud-alert-active');
@@ -1058,13 +1161,13 @@
         timeLossInterval = setInterval(updateTimeLoss, 200);
       }
       if (activeToolId === 'timeLoss') renderToolContent('timeLoss', document.getElementById('overlayTitle'), document.getElementById('overlayContent'));
-      updateTimeLossGrid();
+      updateTileDisplay('timeLoss');
     }
 
     function resetTimeLoss() {
       timeLossTotalMs = 0;
       if (timeLossRunning) timeLossStartMark = Date.now();
-      updateTimeLossGrid();
+      updateTileDisplay('timeLoss');
       if (activeToolId === 'timeLoss') renderToolContent('timeLoss', document.getElementById('overlayTitle'), document.getElementById('overlayContent'));
     }
 
@@ -1072,13 +1175,7 @@
       const current = timeLossTotalMs + (timeLossRunning ? (Date.now() - timeLossStartMark) : 0);
       const display = document.getElementById('timeLossBigDisplay');
       if (display) display.textContent = formatTime(current);
-      updateTimeLossGrid();
-    }
-
-    function updateTimeLossGrid() {
-      const current = timeLossTotalMs + (timeLossRunning ? (Date.now() - timeLossStartMark) : 0);
-      document.getElementById('gridTimeLoss').textContent = formatTime(current);
-      document.getElementById('gridTimeLossStatus').textContent = timeLossRunning ? 'COUNTING...' : 'PAUSED';
+      updateTileDisplay('timeLoss');
     }
 
     // --- STUDENT PICKER LOGIC ---
@@ -1092,7 +1189,7 @@
         if (count > 12) {
           clearInterval(interval);
           playSound('tada');
-          document.getElementById('gridPicker').textContent = disp.textContent;
+          updateTileDisplay('picker');
         }
       }, 80);
     }
@@ -1101,7 +1198,7 @@
       const input = prompt("Enter student names separated by commas:", roster.join(', '));
       if (input) {
         roster = input.split(',').map(s => s.trim()).filter(Boolean);
-        attendanceStatus = {}; // reset attendance tracking for new roster
+        attendanceStatus = {};
         resetSeatingArrangement();
         alert("Roster updated!");
       }
@@ -1120,7 +1217,7 @@
             timerSeconds--;
             const d = document.getElementById('timerBigDisplay');
             if (d) d.textContent = formatTime(timerSeconds * 1000);
-            document.getElementById('gridTimer').textContent = formatTime(timerSeconds * 1000);
+            updateTileDisplay('timer');
           } else {
             clearInterval(timerInterval);
             timerRunning = false;
@@ -1139,7 +1236,7 @@
       timerSeconds = s;
       const d = document.getElementById('timerBigDisplay');
       if (d) d.textContent = formatTime(timerSeconds * 1000);
-      document.getElementById('gridTimer').textContent = formatTime(timerSeconds * 1000);
+      updateTileDisplay('timer');
       if (activeToolId === 'timer') renderToolContent('timer', document.getElementById('overlayTitle'), document.getElementById('overlayContent'));
     }
 
@@ -1164,7 +1261,7 @@
           stopwatchMs = Date.now() - mark;
           const d = document.getElementById('stopwatchBigDisplay');
           if (d) d.textContent = formatTime(stopwatchMs);
-          document.getElementById('gridStopwatch').textContent = formatTime(stopwatchMs);
+          updateTileDisplay('stopwatch');
         }, 200);
       }
       if (activeToolId === 'stopwatch') renderToolContent('stopwatch', document.getElementById('overlayTitle'), document.getElementById('overlayContent'));
@@ -1172,15 +1269,14 @@
 
     function resetStopwatch() {
       stopwatchMs = 0;
-      document.getElementById('gridStopwatch').textContent = '00:00';
+      updateTileDisplay('stopwatch');
       if (activeToolId === 'stopwatch') renderToolContent('stopwatch', document.getElementById('overlayTitle'), document.getElementById('overlayContent'));
     }
 
     // --- TRAFFIC LIGHT LOGIC ---
     function setLight(color) {
       currentLight = color;
-      const icons = { red: '🔴', yellow: '🟡', green: '🟢' };
-      document.getElementById('gridTraffic').textContent = icons[color];
+      updateTileDisplay('traffic');
       if (activeToolId === 'traffic') renderToolContent('traffic', document.getElementById('overlayTitle'), document.getElementById('overlayContent'));
     }
 
@@ -1195,14 +1291,16 @@
       }
       const container = document.getElementById('groupListDisplay');
       if (container) container.innerHTML = html;
-      document.getElementById('gridGroupText').textContent = `${num} Groups`;
+      
+      const gridDisp = document.getElementById('grid_groups_display');
+      if (gridDisp) gridDisp.textContent = `${num} Groups`;
     }
 
     // --- ATTENDANCE LOGIC ---
     function initAttendance() {
       roster.forEach(name => {
         if (attendanceStatus[name] === undefined) {
-          attendanceStatus[name] = true; // Default Present
+          attendanceStatus[name] = true;
         }
       });
     }
@@ -1224,12 +1322,7 @@
 
     function updateAttendanceDisplay() {
       initAttendance();
-      const presentCount = roster.filter(name => attendanceStatus[name] !== false).length;
-      const total = roster.length;
-      const percent = total > 0 ? Math.round((presentCount / total) * 100) : 100;
-
-      document.getElementById('gridAttendance').textContent = `${percent}%`;
-
+      updateTileDisplay('attendance');
       if (activeToolId === 'attendance') {
         renderAttendanceTool(document.getElementById('overlayContent'));
       }
@@ -1274,7 +1367,7 @@
       container.innerHTML = html;
     }
 
-    // --- SEATING GRID LOGIC WITH DRAG & DROP ---
+    // --- SEATING GRID LOGIC ---
     function syncSeatingArrangement() {
       const totalDesks = seatingRows * seatingCols;
       if (seatingArrangement.length !== totalDesks) {
@@ -1348,7 +1441,7 @@
       }
       html += `</div>`;
       container.innerHTML = html;
-      document.getElementById('gridSeatingDimensions').textContent = `${seatingRows}x${seatingCols}`;
+      updateTileDisplay('seating');
     }
 
     function updateSeatingGridDimensions() {
@@ -1359,7 +1452,6 @@
       
       seatingArrangement = [];
       syncSeatingArrangement();
-      
       renderToolContent('seating', document.getElementById('overlayTitle'), document.getElementById('overlayContent'));
     }
 
@@ -1389,9 +1481,8 @@
         seatingArrangement[draggedDeskIndex] = seatingArrangement[targetIndex];
         seatingArrangement[targetIndex] = temp;
 
-        const contentElem = document.getElementById('overlayContent');
         if (activeToolId === 'seating') {
-          renderSeatingGrid(contentElem);
+          renderSeatingGrid(document.getElementById('overlayContent'));
         }
       }
       draggedDeskIndex = null;
@@ -1426,7 +1517,7 @@
 
       html += `</div>`;
       container.innerHTML = html;
-      updateScheduleGrid();
+      updateTileDisplay('schedule');
     }
 
     function addScheduleItem() {
@@ -1437,7 +1528,7 @@
       const timeVal = (timeInput && timeInput.value.trim()) ? timeInput.value.trim() : '00:00';
       scheduleData.push({ id: Date.now(), time: timeVal, activity: actInput.value.trim() });
       if (activeToolId === 'schedule') renderSchedule(document.getElementById('overlayContent'));
-      updateScheduleGrid();
+      updateTileDisplay('schedule');
     }
 
     function updateScheduleItem(idx, field, val) {
@@ -1449,12 +1540,7 @@
     function removeScheduleItem(idx) {
       scheduleData.splice(idx, 1);
       if (activeToolId === 'schedule') renderSchedule(document.getElementById('overlayContent'));
-      updateScheduleGrid();
-    }
-
-    function updateScheduleGrid() {
-      const gridElem = document.getElementById('gridScheduleCount');
-      if (gridElem) gridElem.textContent = `${scheduleData.length} Tasks`;
+      updateTileDisplay('schedule');
     }
 
     // --- CHECKLIST LOGIC ---
@@ -1479,12 +1565,12 @@
 
       html += `</div>`;
       container.innerHTML = html;
-      updateChecklistGrid();
+      updateTileDisplay('checklist');
     }
 
     function toggleCheck(idx) {
       checklist[idx].done = !checklist[idx].done;
-      updateChecklistGrid();
+      updateTileDisplay('checklist');
       if (activeToolId === 'checklist') renderToolContent('checklist', document.getElementById('overlayTitle'), document.getElementById('overlayContent'));
     }
 
@@ -1498,62 +1584,43 @@
       checklist.push({ id: Date.now(), text: input.value.trim(), done: false });
       input.value = '';
       if (activeToolId === 'checklist') renderToolContent('checklist', document.getElementById('overlayTitle'), document.getElementById('overlayContent'));
-      updateChecklistGrid();
+      updateTileDisplay('checklist');
     }
 
     function removeChecklistItem(idx) {
       checklist.splice(idx, 1);
       if (activeToolId === 'checklist') renderToolContent('checklist', document.getElementById('overlayTitle'), document.getElementById('overlayContent'));
-      updateChecklistGrid();
+      updateTileDisplay('checklist');
     }
 
-    function updateChecklistGrid() {
-      const count = checklist.filter(c => c.done).length;
-      document.getElementById('gridChecklist').textContent = `${count}/${checklist.length}`;
-    }
-
-    // --- BACKGROUND MUSIC LOGIC ---
+    // --- REAL BACKGROUND MUSIC LOGIC (CONTINUOUS LOOPS) ---
     function renderBackgroundMusic(container) {
-      const tracks = {
-        "Hype": [
-          "Hype Track 1", 
-          "Hype Track 2", 
-          "Hype Track 3", 
-          "Hype Track 4", 
-          "Hype Track 5"
-        ],
-        "Focus": [
-          "Focus Track 1", 
-          "Focus Track 2", 
-          "Focus Track 3", 
-          "Focus Track 4", 
-          "Focus Track 5"
-        ]
-      };
-
       let html = `
         <div style="margin-bottom: 1.5rem; text-align: center;">
           <p style="font-size: 1.25rem; color: var(--ptps-lime); font-weight: 700; margin-bottom: 0.5rem;">
-            ${isMusicPlaying ? `▶️ Playing: ${currentMusicTrackName} (${currentMusicCategory})` : '⏹️ Music Stopped'}
+            ${isMusicPlaying ? `▶️ Now Playing: ${currentMusicTrackName} (${currentMusicCategory})` : '⏹️ Music Stopped'}
           </p>
-          <div style="display: flex; gap: 1rem; align-items: center; justify-content: center;">
+          <div style="display: flex; gap: 1rem; align-items: center; justify-content: center; flex-wrap: wrap;">
             <button class="control-btn danger" onclick="stopBgMusic()">Stop Music</button>
-            <label style="color:var(--ptps-gray); font-size:0.9rem;">Volume: 
-              <input type="range" min="0" max="1" step="0.05" value="0.3" oninput="setMusicVolume(this.value)" style="width: 120px;" />
+            <label style="color:var(--ptps-gray); font-size:0.9rem; display: flex; align-items: center; gap: 0.5rem;">Volume: 
+              <input type="range" min="0" max="1" step="0.05" value="${musicVolume}" oninput="setMusicVolume(this.value)" style="width: 140px;" />
             </label>
           </div>
         </div>
         <div class="music-grid">
       `;
 
-      for (let cat in tracks) {
-        html += `<div class="music-card"><div class="music-card-title">${cat}</div>`;
-        tracks[cat].forEach(track => {
-          const active = isMusicPlaying && currentMusicTrackName === track;
+      for (let category in bgMusicCatalog) {
+        const catIcon = category === 'Hype' ? '🔥' : '🧠';
+        html += `<div class="music-card"><div class="music-card-title">${catIcon} ${category} (5 Tracks)</div>`;
+        
+        bgMusicCatalog[category].forEach(trackObj => {
+          const active = isMusicPlaying && currentMusicTrackName === trackObj.name;
           html += `
-            <button class="control-btn preset" style="width:100%; margin:0.2rem 0; text-align:left; ${active ? 'background:var(--ptps-lime); color:var(--ptps-bg-dark); font-weight:bold;' : ''}" 
-              onclick="playBgMusic('${cat}', '${track}')">
-              ${active ? '▶ ' : '🎵 '}${track}
+            <button class="control-btn preset" style="width:100%; margin:0.3rem 0; text-align:left; display: flex; justify-content: space-between; align-items: center; ${active ? 'background:var(--ptps-lime); color:var(--ptps-bg-dark); font-weight:bold;' : ''}" 
+              onclick="playBgMusic('${category}', '${trackObj.name}', '${trackObj.url}')">
+              <span>${active ? '▶ ' : '🎵 '}${trackObj.name}</span>
+              <span style="font-size:0.75rem; opacity:0.8;">🔂 1-min Loop</span>
             </button>
           `;
         });
@@ -1564,95 +1631,61 @@
       container.innerHTML = html;
     }
 
+    function playBgMusic(category, trackName, url) {
+      if (isMusicPlaying && currentMusicTrackName === trackName) return;
+
+      bgAudioPlayer.pause();
+      bgAudioPlayer.src = url;
+      bgAudioPlayer.loop = true; // Seamless 1-min loop
+      bgAudioPlayer.volume = musicVolume;
+      
+      bgAudioPlayer.play().then(() => {
+        isMusicPlaying = true;
+        currentMusicCategory = category;
+        currentMusicTrackName = trackName;
+        updateTileDisplay('bgMusic');
+        if (activeToolId === 'bgMusic') renderToolContent('bgMusic', document.getElementById('overlayTitle'), document.getElementById('overlayContent'));
+      }).catch(err => {
+        alert("Audio playback failed or stream blocked: " + err.message);
+      });
+    }
+
     function stopBgMusic() {
-      musicAudioNodes.forEach(node => { try { node.stop(); node.disconnect(); } catch(e){} });
-      musicAudioNodes = [];
+      bgAudioPlayer.pause();
       isMusicPlaying = false;
       currentMusicCategory = null;
       currentMusicTrackName = null;
-      document.getElementById('gridMusicStatus').textContent = '🎵';
-      document.getElementById('gridMusicSubtext').textContent = 'STOPPED';
+      updateTileDisplay('bgMusic');
       if (activeToolId === 'bgMusic') renderToolContent('bgMusic', document.getElementById('overlayTitle'), document.getElementById('overlayContent'));
     }
 
     function setMusicVolume(val) {
-      if (musicGainNode) musicGainNode.gain.setValueAtTime(parseFloat(val), audioCtx.currentTime);
+      musicVolume = parseFloat(val);
+      bgAudioPlayer.volume = musicVolume;
     }
 
-    function playBgMusic(category, trackName) {
-      stopBgMusic();
-      initAudio();
-
-      isMusicPlaying = true;
-      currentMusicCategory = category;
-      currentMusicTrackName = trackName;
-
-      musicGainNode = audioCtx.createGain();
-      musicGainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
-      musicGainNode.connect(audioCtx.destination);
-
-      const trackNum = parseInt(trackName.replace(/\D/g, '')) || 1;
-      const trackIdx = Math.max(0, Math.min(4, trackNum - 1));
-
-      if (category === 'Hype') {
-        const hypeFreqSets = [
-          [261.63, 329.63, 392.00, 523.25], 
-          [293.66, 369.99, 440.00, 587.33], 
-          [329.63, 415.30, 493.88, 659.25], 
-          [349.23, 440.00, 523.25, 698.46], 
-          [392.00, 493.88, 587.33, 783.99]  
-        ];
-        const freqs = hypeFreqSets[trackIdx];
-        let idx = 0;
-        const interval = setInterval(() => {
-          if (!isMusicPlaying) return clearInterval(interval);
-          const osc = audioCtx.createOscillator();
-          const g = audioCtx.createGain();
-          osc.type = 'sawtooth';
-          osc.frequency.value = freqs[idx % freqs.length];
-          g.gain.setValueAtTime(0.15, audioCtx.currentTime);
-          g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
-          osc.connect(g); g.connect(musicGainNode);
-          osc.start(); osc.stop(audioCtx.currentTime + 0.2);
-          idx++;
-        }, 180);
-      } 
-      else if (category === 'Focus') {
-        const focusFreqSets = [
-          [196.00, 246.94, 293.66], 
-          [220.00, 261.63, 329.63], 
-          [174.61, 220.00, 261.63], 
-          [261.63, 329.63, 392.00], 
-          [293.66, 349.23, 440.00]  
-        ];
-        const freqs = focusFreqSets[trackIdx];
-        let idx = 0;
-        const interval = setInterval(() => {
-          if (!isMusicPlaying) return clearInterval(interval);
-          const osc = audioCtx.createOscillator();
-          const g = audioCtx.createGain();
-          osc.type = 'sine';
-          osc.frequency.value = freqs[idx % freqs.length];
-          g.gain.setValueAtTime(0.1, audioCtx.currentTime);
-          g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.6);
-          osc.connect(g); g.connect(musicGainNode);
-          osc.start(); osc.stop(audioCtx.currentTime + 0.6);
-          idx++;
-        }, 500);
-      }
-
-      document.getElementById('gridMusicStatus').textContent = '▶️';
-      document.getElementById('gridMusicSubtext').textContent = trackName;
-      if (activeToolId === 'bgMusic') renderToolContent('bgMusic', document.getElementById('overlayTitle'), document.getElementById('overlayContent'));
+    // --- HELPER UTILITIES ---
+    function updateTileDisplay(toolId) {
+      const def = toolDefinitions[toolId];
+      if (!def) return;
+      const disp = document.getElementById(`grid_${toolId}_display`);
+      const sub = document.getElementById(`grid_${toolId}_subtext`);
+      if (disp) disp.textContent = def.getDisplay();
+      if (sub) sub.textContent = def.getSubtext();
     }
 
-    // --- UTILS ---
     function formatTime(ms) {
       const totalSec = Math.floor(ms / 1000);
       const m = Math.floor(totalSec / 60);
       const s = totalSec % 60;
       return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
     }
+
+    // --- INITIALIZATION ---
+    window.addEventListener('DOMContentLoaded', () => {
+      loadSavedTileOrder();
+      renderDashboardGrid();
+    });
   </script>
 </body>
 </html>
