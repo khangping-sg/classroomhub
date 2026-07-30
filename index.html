@@ -3,19 +3,41 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PTPS Classroom Hub</title>
+  <title>Pei Tong Primary School - Classroom Hub</title>
   <style>
     :root {
-      --ptps-lime: #78BE20;
+      /* Pei Tong Primary Corporate Colors & Palette */
+      --ptps-lime: #6BB318;
+      --ptps-lime-dark: #528B11;
       --ptps-turquoise: #00A499;
-      --ptps-gray: #888B8D;
-      --ptps-bg-dark: #0d1416;
-      --ptps-card-bg: #172124;
-      --ptps-card-border: #28363a;
-      --ptps-text-light: #f8fafc;
-      --ptps-yellow: #f59e0b;
-      --ptps-red: #ef4444;
-      --ptps-blue: #3b82f6;
+      --ptps-turquoise-dark: #007D75;
+      --ptps-yellow: #FFB800;
+      --ptps-orange: #FF7A00;
+      --ptps-red: #FF4D4D;
+      --ptps-blue: #3B82F6;
+      --ptps-purple: #8B5CF6;
+      
+      /* Light Mode Palette */
+      --ptps-bg-canvas: #EEF8F3;
+      --ptps-card-bg: #FFFFFF;
+      --ptps-card-border: #D1E9DD;
+      --ptps-text-dark: #1E293B;
+      --ptps-text-muted: #64748B;
+      --ptps-shadow: 0 10px 25px -5px rgba(0, 164, 153, 0.12), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+      --ptps-shadow-hover: 0 18px 30px -5px rgba(107, 179, 24, 0.22), 0 10px 12px -5px rgba(0, 0, 0, 0.08);
+      --ptps-glow: transparent;
+    }
+
+    /* Vibrant Dark Mode Palette */
+    body.dark-mode {
+      --ptps-bg-canvas: #0F172A;
+      --ptps-card-bg: #1E293B;
+      --ptps-card-border: #334155;
+      --ptps-text-dark: #F8FAFC;
+      --ptps-text-muted: #94A3B8;
+      --ptps-shadow: 0 10px 25px -5px rgba(0, 164, 153, 0.25), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+      --ptps-shadow-hover: 0 18px 30px -5px rgba(107, 179, 24, 0.4), 0 10px 12px -5px rgba(0, 0, 0, 0.5);
+      --ptps-glow: 0 0 15px rgba(107, 179, 24, 0.35);
     }
 
     * {
@@ -25,29 +47,43 @@
     }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background-color: var(--ptps-bg-dark);
-      color: var(--ptps-text-light);
+      font-family: 'Comic Sans MS', 'Fredoka', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--ptps-bg-canvas);
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(107, 179, 24, 0.12) 0%, transparent 25%),
+        radial-gradient(circle at 90% 80%, rgba(0, 164, 153, 0.12) 0%, transparent 25%);
+      color: var(--ptps-text-dark);
       min-height: 100vh;
       padding: 1.25rem;
-      transition: background-color 0.3s ease, padding 0.2s ease;
+      transition: background-color 0.3s ease, color 0.3s ease, padding 0.2s ease;
+    }
+
+    /* Glowing Accents in Dark Mode */
+    body.dark-mode .display-main {
+      text-shadow: 0 0 10px rgba(107, 179, 24, 0.4);
+    }
+    body.dark-mode .school-logo-badge {
+      box-shadow: 0 0 15px rgba(0, 164, 153, 0.6);
+    }
+    body.dark-mode .big-display {
+      text-shadow: 0 0 20px rgba(107, 179, 24, 0.5);
     }
 
     /* Ambient Alert Animations */
     body.time-loss-active {
-      animation: room-alert-red 2s infinite ease-in-out;
+      animation: room-alert-red 1.5s infinite ease-in-out;
     }
     body.noise-alert-active {
       animation: room-alert-orange 0.8s infinite ease-in-out;
     }
 
     @keyframes room-alert-red {
-      0%, 100% { background-color: #1a0f16; }
-      50% { background-color: #3b0d18; }
+      0%, 100% { background-color: #FEE2E2; }
+      50% { background-color: #FECACA; }
     }
     @keyframes room-alert-orange {
-      0%, 100% { background-color: #1c130b; }
-      50% { background-color: #451a03; }
+      0%, 100% { background-color: #FEF3C7; }
+      50% { background-color: #FDE68A; }
     }
 
     /* Header Navigation */
@@ -57,10 +93,14 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-bottom: 2px solid var(--ptps-card-border);
-      padding-bottom: 1rem;
+      background: var(--ptps-card-bg);
+      padding: 1rem 1.5rem;
+      border-radius: 1.5rem;
+      border: 3px solid var(--ptps-card-border);
+      box-shadow: var(--ptps-shadow);
       flex-wrap: wrap;
       gap: 0.75rem;
+      transition: background-color 0.3s, border-color 0.3s;
     }
 
     .header-title-group {
@@ -69,14 +109,27 @@
       gap: 1rem;
     }
 
+    .school-logo-badge {
+      background: linear-gradient(135deg, var(--ptps-lime), var(--ptps-turquoise));
+      color: #FFFFFF;
+      font-weight: 900;
+      font-size: 1.2rem;
+      padding: 0.5rem 0.85rem;
+      border-radius: 1rem;
+      box-shadow: 0 4px 10px rgba(0, 164, 153, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
     h1 {
       font-size: 1.75rem;
-      font-weight: 800;
-      letter-spacing: -0.02em;
+      font-weight: 900;
       color: var(--ptps-lime);
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.4rem;
+      letter-spacing: -0.01em;
     }
 
     h1 span {
@@ -84,13 +137,13 @@
     }
 
     .badge {
-      background: var(--ptps-card-bg);
-      border: 1px solid var(--ptps-turquoise);
-      padding: 0.4rem 0.9rem;
+      background: rgba(0, 164, 153, 0.15);
+      border: 2px solid var(--ptps-turquoise);
+      padding: 0.35rem 0.9rem;
       border-radius: 2rem;
-      font-size: 0.825rem;
-      color: var(--ptps-text-light);
-      font-weight: 500;
+      font-size: 0.85rem;
+      color: var(--ptps-turquoise);
+      font-weight: 800;
     }
 
     .header-controls {
@@ -100,11 +153,11 @@
       flex-wrap: wrap;
     }
 
-    /* View Switcher Toggle */
-    .view-mode-selector {
+    /* View & Theme Selector Toggles */
+    .view-mode-selector, .theme-mode-selector {
       display: flex;
-      background: var(--ptps-card-bg);
-      border: 1px solid var(--ptps-card-border);
+      background: var(--ptps-bg-canvas);
+      border: 2px solid var(--ptps-card-border);
       border-radius: 2rem;
       padding: 0.25rem;
       gap: 0.2rem;
@@ -113,11 +166,11 @@
     .view-btn {
       background: transparent;
       border: none;
-      color: var(--ptps-gray);
-      padding: 0.4rem 0.85rem;
+      color: var(--ptps-text-muted);
+      padding: 0.45rem 0.95rem;
       border-radius: 1.5rem;
-      font-size: 0.825rem;
-      font-weight: 700;
+      font-size: 0.85rem;
+      font-weight: 800;
       cursor: pointer;
       transition: all 0.2s ease;
     }
@@ -125,24 +178,25 @@
     .view-btn.active {
       background: var(--ptps-turquoise);
       color: #ffffff;
-      box-shadow: 0 2px 8px rgba(0, 164, 153, 0.4);
+      box-shadow: 0 3px 10px rgba(0, 164, 153, 0.35);
     }
 
     .btn-reset-layout {
       background: var(--ptps-card-bg);
-      border: 1px solid var(--ptps-card-border);
-      color: var(--ptps-gray);
-      padding: 0.45rem 0.9rem;
+      border: 2px solid var(--ptps-yellow);
+      color: var(--ptps-text-dark);
+      padding: 0.45rem 1rem;
       border-radius: 2rem;
-      font-size: 0.825rem;
-      font-weight: 600;
+      font-size: 0.85rem;
+      font-weight: 800;
       cursor: pointer;
       transition: all 0.2s ease;
+      box-shadow: 0 2px 6px rgba(255, 184, 0, 0.2);
     }
     .btn-reset-layout:hover {
-      color: var(--ptps-text-light);
-      border-color: var(--ptps-turquoise);
-      background: rgba(0, 164, 153, 0.1);
+      background: var(--ptps-yellow);
+      color: #FFFFFF;
+      transform: translateY(-2px);
     }
 
     /* Dashboard Grid Base */
@@ -159,7 +213,7 @@
     }
 
     body.view-pc .tile {
-      min-height: 180px;
+      min-height: 185px;
       padding: 1.25rem;
       cursor: grab;
     }
@@ -197,7 +251,7 @@
     body.view-mobile .tile {
       min-height: 140px;
       padding: 0.85rem;
-      border-radius: 0.85rem;
+      border-radius: 1.1rem;
     }
 
     body.view-mobile .tile-title {
@@ -209,11 +263,11 @@
     }
 
     body.view-mobile .tile-subtext {
-      font-size: 0.65rem;
+      font-size: 0.68rem;
     }
 
     body.view-mobile .tile-expand-icon {
-      font-size: 0.65rem;
+      font-size: 0.7rem;
       padding: 0.2rem 0.35rem;
     }
 
@@ -240,14 +294,15 @@
     /* Tile Component */
     .tile {
       background: var(--ptps-card-bg);
-      border: 1px solid var(--ptps-card-border);
-      border-radius: 1rem;
+      border: 3px solid var(--ptps-card-border);
+      border-radius: 1.5rem;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
       user-select: none;
-      transition: transform 0.15s ease, border-color 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.3s ease;
       position: relative;
+      box-shadow: var(--ptps-shadow);
     }
 
     .tile:active {
@@ -255,9 +310,9 @@
     }
 
     .tile:hover {
-      transform: translateY(-3px);
-      border-color: var(--ptps-turquoise);
-      box-shadow: 0 10px 20px -5px rgba(0, 164, 153, 0.3);
+      transform: translateY(-6px) scale(1.02);
+      border-color: var(--ptps-lime);
+      box-shadow: var(--ptps-shadow-hover);
     }
 
     .tile.grid-dragging {
@@ -266,9 +321,9 @@
     }
 
     .tile.grid-drag-over {
-      border-color: var(--ptps-lime);
-      background: rgba(120, 190, 32, 0.12);
-      transform: scale(1.03);
+      border-color: var(--ptps-turquoise);
+      background: rgba(0, 164, 153, 0.15);
+      transform: scale(1.04);
     }
 
     .tile-header {
@@ -279,24 +334,25 @@
     }
 
     .tile-title {
-      font-weight: 600;
+      font-weight: 800;
       display: flex;
       align-items: center;
       gap: 0.4rem;
-      color: var(--ptps-text-light);
+      color: var(--ptps-text-dark);
     }
 
     .drag-handle-icon {
       font-size: 0.9rem;
-      color: var(--ptps-gray);
+      color: var(--ptps-text-muted);
       opacity: 0.6;
     }
 
     .tile-expand-icon {
-      color: var(--ptps-gray);
-      background: var(--ptps-bg-dark);
-      border-radius: 0.4rem;
-      border: 1px solid var(--ptps-card-border);
+      color: var(--ptps-turquoise);
+      background: rgba(0, 164, 153, 0.15);
+      border-radius: 0.5rem;
+      padding: 0.1rem 0.4rem;
+      font-weight: 900;
     }
 
     .tile-body {
@@ -310,32 +366,81 @@
     }
 
     .display-main {
-      font-weight: 800;
+      font-weight: 900;
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
       color: var(--ptps-lime);
     }
 
     .tile-subtext {
       text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--ptps-gray);
+      letter-spacing: 0.06em;
+      color: var(--ptps-text-muted);
       margin-top: 0.3rem;
-      font-weight: 600;
-    }
-
-    /* Time Loss Tile Specific */
-    .tile-time-loss {
-      background: linear-gradient(145deg, var(--ptps-card-bg), var(--ptps-bg-dark));
-      border: 2px solid #ef4444;
+      font-weight: 800;
     }
 
     /* Ready in 30 Tile Specific */
     .tile-ready-30 {
-      background: linear-gradient(145deg, rgba(120, 190, 32, 0.15), var(--ptps-card-bg));
-      border: 2px solid var(--ptps-lime);
+      border: 3px solid var(--ptps-lime);
+      box-shadow: var(--ptps-glow);
     }
 
-    /* Ready in 30 Module Custom Visual Styling */
+    /* Time Loss Tile Specific */
+    .tile-time-loss {
+      border: 3px solid var(--ptps-red);
+    }
+
+    /* Module Visual Ring Styling */
+    .ring-timer-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      max-width: 600px;
+    }
+
+    .ring-clock-wrapper {
+      position: relative;
+      width: 240px;
+      height: 240px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 1rem 0;
+    }
+
+    .ring-svg {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      transform: rotate(-90deg);
+    }
+
+    .ring-circle-bg {
+      fill: none;
+      stroke: var(--ptps-card-border);
+      stroke-width: 14;
+    }
+
+    .ring-circle-progress {
+      fill: none;
+      stroke: var(--ptps-lime);
+      stroke-width: 14;
+      stroke-linecap: round;
+      stroke-dasharray: 628;
+      stroke-dashoffset: 0;
+      transition: stroke-dashoffset 0.8s linear, stroke 0.3s ease;
+    }
+
+    .ring-time-text {
+      font-size: 3.5rem;
+      font-weight: 900;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      color: var(--ptps-lime);
+      z-index: 2;
+    }
+
+    /* Ready in 30 Module Styling */
     .ready30-container {
       display: flex;
       flex-direction: column;
@@ -345,7 +450,7 @@
     }
 
     .ready30-badge-header {
-      background: linear-gradient(90deg, #1e3a8a, #0284c7);
+      background: linear-gradient(90deg, var(--ptps-lime), var(--ptps-turquoise));
       color: #fff;
       font-size: 1.5rem;
       font-weight: 900;
@@ -354,55 +459,13 @@
       border-radius: 2rem;
       letter-spacing: 0.05em;
       margin-bottom: 1.25rem;
-      box-shadow: 0 4px 15px rgba(2, 132, 199, 0.4);
+      box-shadow: 0 4px 15px rgba(0, 164, 153, 0.35);
       text-align: center;
     }
 
-    .ready30-clock-wrapper {
-      position: relative;
-      width: 210px;
-      height: 210px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0.5rem 0 1.25rem 0;
-    }
-
-    .ready30-svg-ring {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      transform: rotate(-90deg);
-    }
-
-    .ready30-svg-circle-bg {
-      fill: none;
-      stroke: var(--ptps-card-border);
-      stroke-width: 12;
-    }
-
-    .ready30-svg-circle-progress {
-      fill: none;
-      stroke: var(--ptps-lime);
-      stroke-width: 12;
-      stroke-linecap: round;
-      stroke-dasharray: 565;
-      stroke-dashoffset: 0;
-      transition: stroke-dashoffset 0.8s linear, stroke 0.3s ease;
-    }
-
-    .ready30-time-text {
-      font-size: 4.5rem;
-      font-weight: 900;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-      color: var(--ptps-lime);
-      z-index: 2;
-      text-shadow: 0 0 20px rgba(120, 190, 32, 0.4);
-    }
-
     .ready30-cheer-box {
-      background: linear-gradient(135deg, rgba(0, 164, 153, 0.2), rgba(120, 190, 32, 0.2));
-      border: 2px solid var(--ptps-turquoise);
+      background: var(--ptps-card-bg);
+      border: 3px solid var(--ptps-turquoise);
       border-radius: 1.25rem;
       padding: 1rem 1.5rem;
       width: 100%;
@@ -412,13 +475,13 @@
       justify-content: center;
       text-align: center;
       margin-bottom: 1.25rem;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      box-shadow: var(--ptps-shadow);
     }
 
     .ready30-cheer-text {
       font-size: 1.45rem;
-      font-weight: 800;
-      color: #ffffff;
+      font-weight: 900;
+      color: var(--ptps-turquoise);
       animation: cheer-pop 0.4s ease-out;
     }
 
@@ -443,25 +506,25 @@
 
     .ready30-rule-card {
       background: var(--ptps-card-bg);
-      border: 2px solid var(--ptps-card-border);
-      border-radius: 0.85rem;
+      border: 3px solid var(--ptps-card-border);
+      border-radius: 1rem;
       padding: 0.85rem;
       text-align: center;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 0.5rem;
-      font-weight: 700;
+      font-weight: 800;
       font-size: 1.05rem;
-      color: var(--ptps-text-light);
+      color: var(--ptps-text-dark);
       transition: all 0.3s ease;
     }
 
     .ready30-rule-card.active-rule {
       border-color: var(--ptps-lime);
-      background: rgba(120, 190, 32, 0.2);
-      transform: scale(1.03);
-      box-shadow: 0 0 15px rgba(120, 190, 32, 0.3);
+      background: rgba(107, 179, 24, 0.15);
+      transform: scale(1.04);
+      box-shadow: 0 4px 15px rgba(107, 179, 24, 0.3);
     }
 
     .ready30-rule-card .diamond {
@@ -469,15 +532,15 @@
     }
 
     .ready30-banner-footer {
-      background: #dc2626;
-      color: #ffffff;
+      background: var(--ptps-yellow);
+      color: #1E293B;
       font-weight: 900;
-      font-size: 1.25rem;
+      font-size: 1.2rem;
       text-transform: uppercase;
       padding: 0.6rem 1.5rem;
       border-radius: 2rem;
       letter-spacing: 0.05em;
-      box-shadow: 0 4px 10px rgba(220, 38, 38, 0.3);
+      box-shadow: 0 4px 10px rgba(255, 184, 0, 0.3);
       text-align: center;
       margin-top: 0.5rem;
     }
@@ -486,14 +549,18 @@
     .fullscreen-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(13, 20, 22, 0.96);
+      background: rgba(238, 248, 243, 0.97);
       backdrop-filter: blur(12px);
       z-index: 1000;
       display: none;
       flex-direction: column;
       padding: 2rem;
-      transition: background-color 0.2s ease;
+      transition: background-color 0.3s ease;
       overflow-y: auto;
+    }
+
+    body.dark-mode .fullscreen-overlay {
+      background: rgba(15, 23, 42, 0.97);
     }
 
     .fullscreen-overlay.active {
@@ -505,8 +572,8 @@
     }
 
     @keyframes loud-bg-blink {
-      0% { background: rgba(13, 20, 22, 0.96); }
-      100% { background: rgba(220, 38, 38, 0.92); }
+      0% { background: rgba(238, 248, 243, 0.97); }
+      100% { background: rgba(254, 202, 202, 0.95); }
     }
 
     .fullscreen-header {
@@ -516,31 +583,32 @@
       max-width: 1200px;
       width: 100%;
       margin: 0 auto 1.5rem auto;
-      border-bottom: 1px solid var(--ptps-card-border);
+      border-bottom: 3px solid var(--ptps-card-border);
       padding-bottom: 1rem;
     }
 
     .fullscreen-title {
-      font-size: 1.75rem;
-      font-weight: 700;
+      font-size: 1.85rem;
+      font-weight: 900;
       color: var(--ptps-lime);
     }
 
     .btn-close {
-      background: var(--ptps-card-border);
-      border: 1px solid var(--ptps-gray);
-      color: #fff;
+      background: var(--ptps-card-bg);
+      border: 3px solid var(--ptps-red);
+      color: var(--ptps-red);
       font-size: 0.95rem;
-      font-weight: 600;
+      font-weight: 800;
       padding: 0.6rem 1.4rem;
       border-radius: 2rem;
       cursor: pointer;
-      transition: background 0.2s, border-color 0.2s;
+      transition: all 0.2s ease;
     }
 
     .btn-close:hover {
-      background: #ef4444;
-      border-color: #ef4444;
+      background: var(--ptps-red);
+      color: #FFFFFF;
+      transform: scale(1.05);
     }
 
     .fullscreen-content {
@@ -556,7 +624,7 @@
 
     /* Widget Components */
     .big-display {
-      font-size: 7.5rem;
+      font-size: 6.5rem;
       font-weight: 900;
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
       line-height: 1;
@@ -566,12 +634,11 @@
 
     .loud-alert-banner {
       display: none;
-      color: #ffffff;
+      color: var(--ptps-red);
       font-size: 2.75rem;
       font-weight: 900;
       text-transform: uppercase;
       letter-spacing: 0.05em;
-      text-shadow: 0 0 20px #000;
       margin-bottom: 1.5rem;
       animation: pulse-loud 0.3s infinite alternate;
       text-align: center;
@@ -586,33 +653,43 @@
       background: var(--ptps-turquoise);
       color: #fff;
       border: none;
-      font-weight: 700;
-      border-radius: 0.75rem;
+      font-weight: 800;
+      border-radius: 1rem;
       cursor: pointer;
       margin: 0.35rem;
-      transition: transform 0.1s, background 0.2s;
+      transition: transform 0.15s ease, background 0.2s ease, box-shadow 0.2s ease;
       display: inline-flex;
       align-items: center;
       justify-content: center;
+      box-shadow: 0 4px 10px rgba(0, 164, 153, 0.25);
     }
     .control-btn:hover {
-      transform: scale(1.02);
-      background: #00837a;
+      transform: translateY(-2px) scale(1.03);
+      background: var(--ptps-turquoise-dark);
     }
-    .control-btn.danger { background: #ef4444; }
-    .control-btn.danger:hover { background: #dc2626; }
-    .control-btn.secondary { background: var(--ptps-gray); }
-    .control-btn.secondary:hover { background: #6f7274; }
+    .control-btn.danger { 
+      background: var(--ptps-red); 
+      box-shadow: 0 4px 10px rgba(255, 77, 77, 0.25);
+    }
+    .control-btn.danger:hover { background: #E63939; }
+    .control-btn.secondary { 
+      background: var(--ptps-card-bg); 
+      color: var(--ptps-text-dark);
+      border: 2px solid var(--ptps-card-border);
+      box-shadow: none;
+    }
+    .control-btn.secondary:hover { background: var(--ptps-bg-canvas); }
     .control-btn.preset {
       background: var(--ptps-card-bg);
-      border: 1px solid var(--ptps-card-border);
-      color: var(--ptps-text-light);
+      border: 2px solid var(--ptps-card-border);
+      color: var(--ptps-text-dark);
       font-size: 0.95rem;
       padding: 0.55rem 1.1rem;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
     }
     .control-btn.preset:hover {
       background: var(--ptps-lime);
-      color: var(--ptps-bg-dark);
+      color: #FFFFFF;
       border-color: var(--ptps-lime);
       font-weight: 800;
     }
@@ -621,9 +698,10 @@
     .meter-container {
       width: 100%;
       max-width: 650px;
-      height: 28px;
-      background: var(--ptps-card-border);
-      border-radius: 14px;
+      height: 32px;
+      background: var(--ptps-card-bg);
+      border: 3px solid var(--ptps-card-border);
+      border-radius: 16px;
       overflow: hidden;
       margin: 1.5rem 0;
       position: relative;
@@ -639,19 +717,20 @@
       top: 0;
       bottom: 0;
       width: 4px;
-      background: #ffffff;
-      box-shadow: 0 0 8px #fff;
+      background: var(--ptps-red);
+      box-shadow: 0 0 8px var(--ptps-red);
       z-index: 2;
     }
 
     /* Traffic Light */
     .traffic-light-box {
-      background: var(--ptps-card-bg);
+      background: #0F172A;
       padding: 1.5rem;
-      border-radius: 2rem;
+      border-radius: 2.5rem;
       display: flex;
       gap: 1.5rem;
-      border: 2px solid var(--ptps-card-border);
+      border: 4px solid #334155;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
     }
     .light-bulb {
       width: 80px;
@@ -661,8 +740,8 @@
       cursor: pointer;
       transition: opacity 0.2s, transform 0.2s;
     }
-    .light-bulb.red { background: #ef4444; box-shadow: 0 0 30px #ef4444; }
-    .light-bulb.yellow { background: #eab308; box-shadow: 0 0 30px #eab308; }
+    .light-bulb.red { background: var(--ptps-red); box-shadow: 0 0 30px var(--ptps-red); }
+    .light-bulb.yellow { background: var(--ptps-yellow); box-shadow: 0 0 30px var(--ptps-yellow); }
     .light-bulb.green { background: var(--ptps-lime); box-shadow: 0 0 30px var(--ptps-lime); }
     .light-bulb.active { opacity: 1; transform: scale(1.1); }
 
@@ -671,17 +750,18 @@
       width: 100%;
       max-width: 650px;
       background: var(--ptps-card-bg);
-      border-radius: 1rem;
+      border-radius: 1.25rem;
       padding: 1rem;
-      border: 1px solid var(--ptps-card-border);
+      border: 3px solid var(--ptps-card-border);
       max-height: 380px;
       overflow-y: auto;
+      box-shadow: var(--ptps-shadow);
     }
     .list-item {
       display: flex;
       justify-content: space-between;
       padding: 0.75rem 1rem;
-      border-bottom: 1px solid var(--ptps-card-border);
+      border-bottom: 2px dashed var(--ptps-card-border);
       align-items: center;
       gap: 0.5rem;
       transition: background 0.2s;
@@ -694,8 +774,8 @@
       cursor: grabbing;
     }
     .list-item.drag-over-item {
-      border-top: 2px solid var(--ptps-lime);
-      background: rgba(120, 190, 32, 0.1);
+      border-top: 3px solid var(--ptps-lime);
+      background: rgba(107, 179, 24, 0.15);
     }
 
     /* Group Maker Interactive Drag & Drop Containers */
@@ -711,23 +791,24 @@
     }
     .group-card {
       background: var(--ptps-card-bg);
-      border: 2px dashed var(--ptps-card-border);
-      border-radius: 0.85rem;
+      border: 3px dashed var(--ptps-card-border);
+      border-radius: 1.25rem;
       padding: 1rem;
       min-height: 140px;
       transition: border-color 0.2s, background 0.2s;
+      box-shadow: var(--ptps-shadow);
     }
     .group-card.group-drag-over {
       border-color: var(--ptps-lime);
-      background: rgba(120, 190, 32, 0.1);
+      background: rgba(107, 179, 24, 0.15);
     }
     .group-card-header {
-      font-weight: 700;
+      font-weight: 800;
       color: var(--ptps-lime);
       margin-bottom: 0.75rem;
       display: flex;
       justify-content: space-between;
-      border-bottom: 1px solid var(--ptps-card-border);
+      border-bottom: 2px solid var(--ptps-card-border);
       padding-bottom: 0.4rem;
     }
     .group-member-list {
@@ -736,13 +817,13 @@
       gap: 0.4rem;
     }
     .student-chip {
-      background: var(--ptps-bg-dark);
-      border: 1px solid var(--ptps-turquoise);
-      color: var(--ptps-text-light);
+      background: var(--ptps-bg-canvas);
+      border: 2px solid var(--ptps-turquoise);
+      color: var(--ptps-turquoise);
       padding: 0.35rem 0.75rem;
       border-radius: 1rem;
       font-size: 0.85rem;
-      font-weight: 600;
+      font-weight: 800;
       cursor: grab;
       user-select: none;
       transition: transform 0.15s, background 0.2s;
@@ -759,7 +840,7 @@
     .desk-tile {
       background: var(--ptps-card-bg);
       padding: 0.85rem 0.6rem;
-      border-radius: 0.75rem;
+      border-radius: 1rem;
       text-align: center;
       border: 2px dashed var(--ptps-card-border);
       font-size: 0.85rem;
@@ -771,11 +852,12 @@
       justify-content: center;
       align-items: center;
       min-height: 80px;
+      box-shadow: var(--ptps-shadow);
     }
     .desk-tile:active { cursor: grabbing; }
     .desk-tile:hover {
       border-color: var(--ptps-turquoise);
-      transform: translateY(-2px);
+      transform: translateY(-3px);
     }
     .desk-tile.dragging {
       opacity: 0.4;
@@ -783,7 +865,7 @@
     }
     .desk-tile.drag-over {
       border-color: var(--ptps-lime);
-      background: rgba(120, 190, 32, 0.15);
+      background: rgba(107, 179, 24, 0.15);
       transform: scale(1.05);
     }
 
@@ -797,12 +879,13 @@
     }
     .music-card {
       background: var(--ptps-card-bg);
-      border: 1px solid var(--ptps-card-border);
+      border: 3px solid var(--ptps-card-border);
       padding: 1.25rem;
-      border-radius: 0.85rem;
+      border-radius: 1.25rem;
+      box-shadow: var(--ptps-shadow);
     }
     .music-card-title {
-      font-weight: 700;
+      font-weight: 800;
       color: var(--ptps-turquoise);
       margin-bottom: 0.75rem;
       font-size: 1.2rem;
@@ -813,12 +896,13 @@
 
     /* Form Controls */
     input[type="text"], input[type="number"], textarea, select {
-      background: var(--ptps-bg-dark);
-      border: 1px solid var(--ptps-card-border);
-      color: #fff;
+      background: var(--ptps-card-bg);
+      border: 2px solid var(--ptps-card-border);
+      color: var(--ptps-text-dark);
       padding: 0.65rem 0.9rem;
-      border-radius: 0.5rem;
+      border-radius: 0.75rem;
       font-size: 1rem;
+      font-family: inherit;
     }
 
     input[type="range"] {
@@ -832,10 +916,17 @@
 
   <header>
     <div class="header-title-group">
-      <h1>PTPS <span>Classroom Hub</span></h1>
-      <div class="badge">Pei Tong Primary School</div>
+      <div class="school-logo-badge">PTPS</div>
+      <h1>Pei Tong <span>Classroom Hub</span></h1>
+      <div class="badge">Passion to Learn, Courage to Lead</div>
     </div>
     <div class="header-controls">
+      <!-- LIGHT / DARK MODE SELECTOR -->
+      <div class="theme-mode-selector">
+        <button id="btnThemeLight" class="view-btn active" onclick="setThemeMode('light')">☀️ Light</button>
+        <button id="btnThemeDark" class="view-btn" onclick="setThemeMode('dark')">🌙 Dark</button>
+      </div>
+      <!-- DEVICE VIEW SELECTOR -->
       <div class="view-mode-selector">
         <button id="btnViewPc" class="view-btn active" onclick="setDeviceView('pc')">💻 PC View</button>
         <button id="btnViewMobile" class="view-btn" onclick="setDeviceView('mobile')">📱 Mobile View</button>
@@ -895,6 +986,40 @@
       updateTileDisplay('attendance');
     }
 
+    // --- LIGHT / DARK THEME MANAGER ---
+    let currentThemeMode = 'light';
+
+    function loadSavedThemeMode() {
+      const saved = localStorage.getItem('ptps_hub_theme');
+      if (saved === 'dark' || saved === 'light') {
+        currentThemeMode = saved;
+      } else {
+        currentThemeMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      applyThemeMode();
+    }
+
+    function setThemeMode(mode) {
+      currentThemeMode = mode;
+      localStorage.setItem('ptps_hub_theme', mode);
+      applyThemeMode();
+    }
+
+    function applyThemeMode() {
+      if (currentThemeMode === 'dark') {
+        document.body.classList.add('dark-mode');
+      } else {
+        document.body.classList.remove('dark-mode');
+      }
+
+      const btnLight = document.getElementById('btnThemeLight');
+      const btnDark = document.getElementById('btnThemeDark');
+      if (btnLight && btnDark) {
+        btnLight.classList.toggle('active', currentThemeMode === 'light');
+        btnDark.classList.toggle('active', currentThemeMode === 'dark');
+      }
+    }
+
     // --- AUDIO SYNTHESIZER FOR SFX & VOICE ---
     let audioCtx = null;
     function initAudio() {
@@ -952,6 +1077,7 @@
         gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
         osc.start(now); osc.stop(now + 0.5);
       } else if (type === 'loudAlert') {
+        // High Pitch (17.4 kHz - >16000Hz embedded)
         const highOsc = audioCtx.createOscillator();
         const highGain = audioCtx.createGain();
         highOsc.type = 'sine';
@@ -963,6 +1089,7 @@
         highOsc.start(now);
         highOsc.stop(now + 0.5);
 
+        // Adult Frequency Backup
         const adultOsc = audioCtx.createOscillator();
         const adultGain = audioCtx.createGain();
         adultOsc.type = 'triangle';
@@ -1136,6 +1263,7 @@
 
     // Countdown Timer State
     let timerSeconds = 300;
+    let timerTotalSeconds = 300;
     let timerRunning = false;
     let timerInterval = null;
 
@@ -1176,7 +1304,7 @@
 
     // --- MAIN DASHBOARD DRAG & DROP TILE ORDER ---
     const defaultTileOrder = [
-      'ready30', 'timeLoss', 'noiseMeter', 'picker', 'bell', 'timer',
+      'ready30', 'timer', 'timeLoss', 'noiseMeter', 'picker', 'bell',
       'stopwatch', 'traffic', 'groups', 'attendance', 'seating',
       'notes', 'soundboard', 'schedule', 'checklist', 'bgMusic'
     ];
@@ -1216,6 +1344,11 @@
         getDisplay: () => ready30Running ? `${ready30Secs}s` : "30s",
         getSubtext: () => ready30Running ? "COUNTING DOWN..." : "TAP TO START"
       },
+      timer: {
+        title: "⏳ Countdown Timer",
+        getDisplay: () => formatTime(timerSeconds * 1000),
+        getSubtext: () => timerRunning ? "COUNTING DOWN..." : "TAP TO START"
+      },
       timeLoss: {
         title: "⏱️ Time Loss",
         extraClass: "tile-time-loss",
@@ -1236,11 +1369,6 @@
         title: "🔔 Classroom Bell",
         getDisplay: () => "🔔",
         getSubtext: () => "ATTENTION CHIME"
-      },
-      timer: {
-        title: "⏳ Countdown Timer",
-        getDisplay: () => formatTime(timerSeconds * 1000),
-        getSubtext: () => "COUNTDOWN"
       },
       stopwatch: {
         title: "⏱️ Stopwatch",
@@ -1404,11 +1532,15 @@
         titleElem.textContent = '⚡ GET READY FOR LESSON!';
         renderReady30Tool(contentElem);
       }
+      else if (toolId === 'timer') {
+        titleElem.textContent = '⏳ Countdown Timer';
+        renderTimerTool(contentElem);
+      }
       else if (toolId === 'timeLoss') {
         titleElem.textContent = '⏱️ Classroom Time Loss Tool';
         contentElem.innerHTML = `
           <div class="big-display" id="timeLossBigDisplay">${formatTime(timeLossTotalMs)}</div>
-          <p style="margin: 1.5rem 0; font-size: 1.25rem; color: var(--ptps-gray);" id="timeLossStatusText">
+          <p style="margin: 1.5rem 0; font-size: 1.25rem; color: var(--ptps-text-muted);" id="timeLossStatusText">
             ${timeLossRunning ? 'COUNTING WASTED TIME...' : 'TIMER PAUSED'}
           </p>
           <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: center; width:100%; max-width:400px;">
@@ -1428,7 +1560,7 @@
             <div class="meter-fill" id="noiseMeterFill"></div>
             <div class="sensitivity-line" id="sensitivityLine" style="left: ${noiseThreshold}%;"></div>
           </div>
-          <p style="margin-bottom: 1rem; color: var(--ptps-gray);">Sensitivity Limit: <span id="threshVal">${noiseThreshold}</span>%</p>
+          <p style="margin-bottom: 1rem; color: var(--ptps-text-muted); font-weight: 700;">Sensitivity Limit: <span id="threshVal">${noiseThreshold}</span>%</p>
           <input type="range" min="10" max="95" value="${noiseThreshold}" oninput="updateSensitivity(this.value)" />
           <div style="margin-top: 2rem; width:100%; max-width:300px;">
             <button class="control-btn" onclick="toggleNoiseMic()">${isNoiseActive ? 'Stop Mic' : 'Start Mic'}</button>
@@ -1445,9 +1577,9 @@
             <button class="control-btn secondary" onclick="openEditRosterModal()">Edit Roster List</button>
           </div>
 
-          <div id="rosterEditorBox" style="display:none; margin-top:1.5rem; width:100%; max-width:600px; background:var(--ptps-card-bg); padding:1.25rem; border-radius:1rem; border:1px solid var(--ptps-card-border);">
-            <p style="font-size:0.85rem; color:var(--ptps-gray); margin-bottom:0.5rem;">
-              Paste or type student names below. Names can be separated by <strong>spaces</strong>, <strong>commas</strong>, or <strong>line breaks</strong>:
+          <div id="rosterEditorBox" style="display:none; margin-top:1.5rem; width:100%; max-width:600px; background:var(--ptps-card-bg); padding:1.25rem; border-radius:1.25rem; border:3px solid var(--ptps-card-border); box-shadow:var(--ptps-shadow);">
+            <p style="font-size:0.85rem; color:var(--ptps-text-muted); margin-bottom:0.5rem; font-weight:700;">
+              Paste or type student names below (separated by spaces, commas, or line breaks):
             </p>
             <textarea id="rosterTextInput" style="width:100%; height:120px; font-size:0.95rem; font-family:monospace; margin-bottom:0.75rem;">${roster.join('\n')}</textarea>
             <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:0.5rem;">
@@ -1464,38 +1596,9 @@
         titleElem.textContent = '🔔 Attention Bell';
         contentElem.innerHTML = `
           <div class="big-display" style="cursor:pointer;" onclick="playSound('bell')">🔔</div>
-          <p style="margin-top: 2rem; color: var(--ptps-gray);">Tap bell to chime</p>
+          <p style="margin-top: 2rem; color: var(--ptps-text-muted); font-weight: 800;">Tap bell to chime</p>
           <div style="margin-top: 1rem; width:100%; max-width:300px;">
             <button class="control-btn" onclick="playSound('bell')">Ring Bell</button>
-          </div>
-        `;
-      }
-      else if (toolId === 'timer') {
-        titleElem.textContent = '⏳ Countdown Timer';
-        contentElem.innerHTML = `
-          <div class="big-display" id="timerBigDisplay">${formatTime(timerSeconds * 1000)}</div>
-          
-          <div style="margin-top: 1.5rem; display: flex; gap: 0.5rem; justify-content: center; width:100%; max-width:400px;">
-            <button class="control-btn ${timerRunning ? 'danger' : ''}" onclick="toggleTimer()">${timerRunning ? 'Pause' : 'Start'}</button>
-            <button class="control-btn secondary" onclick="setTimerSecs(0)">Reset</button>
-          </div>
-
-          <div style="margin-top: 1.25rem; display: flex; gap: 0.4rem; flex-wrap: wrap; justify-content: center; max-width: 650px;">
-            <button class="control-btn preset" onclick="setTimerSecs(10)">10s</button>
-            <button class="control-btn preset" onclick="setTimerSecs(30)">30s</button>
-            <button class="control-btn preset" onclick="setTimerSecs(60)">1m</button>
-            <button class="control-btn preset" onclick="setTimerSecs(180)">3m</button>
-            <button class="control-btn preset" onclick="setTimerSecs(300)">5m</button>
-            <button class="control-btn preset" onclick="setTimerSecs(600)">10m</button>
-            <button class="control-btn preset" onclick="setTimerSecs(900)">15m</button>
-          </div>
-
-          <div style="margin-top: 1.25rem; display: flex; gap: 0.5rem; align-items: center; justify-content: center; background: var(--ptps-card-bg); padding: 0.75rem 1rem; border-radius: 1rem; border: 1px solid var(--ptps-card-border); flex-wrap: wrap;">
-            <span style="font-size: 0.9rem; color: var(--ptps-gray);">Custom:</span>
-            <input type="number" id="customMin" placeholder="Min" min="0" max="180" style="width: 70px; text-align: center;" />
-            <span style="font-weight: bold; color: var(--ptps-gray);">:</span>
-            <input type="number" id="customSec" placeholder="Sec" min="0" max="59" style="width: 70px; text-align: center;" />
-            <button class="control-btn" style="font-size: 0.9rem; padding: 0.5rem 1rem; margin:0;" onclick="setCustomTimer()">Set</button>
           </div>
         `;
       }
@@ -1517,7 +1620,7 @@
             <div class="light-bulb yellow ${currentLight==='yellow'?'active':''}" onclick="setLight('yellow')"></div>
             <div class="light-bulb green ${currentLight==='green'?'active':''}" onclick="setLight('green')"></div>
           </div>
-          <p style="margin-top: 2rem; font-size: 1.35rem; text-transform: uppercase;" id="lightStatus">
+          <p style="margin-top: 2rem; font-size: 1.35rem; font-weight: 800; text-transform: uppercase; color: var(--ptps-turquoise);" id="lightStatus">
             ${currentLight === 'red' ? 'Silence / Stop' : currentLight === 'yellow' ? 'Whisper / Transition' : 'Group Work / Go'}
           </p>
         `;
@@ -1537,7 +1640,7 @@
       else if (toolId === 'notes') {
         titleElem.textContent = '📝 Board Notes';
         contentElem.innerHTML = `
-          <textarea style="height: 280px; max-width: 700px; font-size: 1.15rem; width:100%; border-radius: 0.75rem;" placeholder="Type lesson instructions or board notes..."></textarea>
+          <textarea style="height: 280px; max-width: 700px; font-size: 1.15rem; width:100%; border-radius: 1rem; padding: 1rem;" placeholder="Type lesson instructions or board notes..."></textarea>
         `;
       }
       else if (toolId === 'soundboard') {
@@ -1564,22 +1667,128 @@
       }
     }
 
+    // --- COUNTDOWN TIMER MODULE WITH VISUAL RING/CIRCLE ---
+    function renderTimerTool(container) {
+      const strokeOffset = 628 - (628 * (timerSeconds / (timerTotalSeconds || 1)));
+
+      container.innerHTML = `
+        <div class="ring-timer-container">
+          <div class="ring-clock-wrapper">
+            <svg class="ring-svg" viewBox="0 0 220 220">
+              <circle class="ring-circle-bg" cx="110" cy="110" r="100" />
+              <circle class="ring-circle-progress" id="timerProgressCircle" cx="110" cy="110" r="100" style="stroke-dashoffset: ${strokeOffset};" />
+            </svg>
+            <div class="ring-time-text" id="timerBigDisplay">${formatTime(timerSeconds * 1000)}</div>
+          </div>
+          
+          <div style="margin-top: 1rem; display: flex; gap: 0.5rem; justify-content: center; width:100%; max-width:400px;">
+            <button class="control-btn ${timerRunning ? 'danger' : ''}" style="flex:1;" onclick="toggleTimer()">${timerRunning ? 'Pause' : 'Start Timer'}</button>
+            <button class="control-btn secondary" onclick="setTimerSecs(0)">Reset</button>
+          </div>
+
+          <div style="margin-top: 1.25rem; display: flex; gap: 0.4rem; flex-wrap: wrap; justify-content: center; max-width: 650px;">
+            <button class="control-btn preset" onclick="setTimerSecs(10)">10s</button>
+            <button class="control-btn preset" onclick="setTimerSecs(30)">30s</button>
+            <button class="control-btn preset" onclick="setTimerSecs(60)">1m</button>
+            <button class="control-btn preset" onclick="setTimerSecs(180)">3m</button>
+            <button class="control-btn preset" onclick="setTimerSecs(300)">5m</button>
+            <button class="control-btn preset" onclick="setTimerSecs(600)">10m</button>
+            <button class="control-btn preset" onclick="setTimerSecs(900)">15m</button>
+          </div>
+
+          <div style="margin-top: 1.25rem; display: flex; gap: 0.5rem; align-items: center; justify-content: center; background: var(--ptps-card-bg); padding: 0.75rem 1.25rem; border-radius: 1.25rem; border: 3px solid var(--ptps-card-border); flex-wrap: wrap; box-shadow: var(--ptps-shadow);">
+            <span style="font-size: 0.9rem; font-weight: 800; color: var(--ptps-text-muted);">Custom:</span>
+            <input type="number" id="customMin" placeholder="Min" min="0" max="180" style="width: 70px; text-align: center;" />
+            <span style="font-weight: bold; color: var(--ptps-text-muted);">:</span>
+            <input type="number" id="customSec" placeholder="Sec" min="0" max="59" style="width: 70px; text-align: center;" />
+            <button class="control-btn" style="font-size: 0.9rem; padding: 0.5rem 1rem; margin:0;" onclick="setCustomTimer()">Set</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function toggleTimer() {
+      if (timerRunning) {
+        clearInterval(timerInterval);
+        timerRunning = false;
+        updateTileDisplay('timer');
+        if (activeToolId === 'timer') renderTimerTool(document.getElementById('overlayContent'));
+      } else {
+        if (timerSeconds <= 0) return;
+        timerRunning = true;
+        updateTimerUI();
+
+        timerInterval = setInterval(() => {
+          if (timerSeconds > 0) {
+            timerSeconds--;
+            updateTimerUI();
+          } else {
+            clearInterval(timerInterval);
+            timerRunning = false;
+            playSound('buzzer');
+            updateTimerUI();
+          }
+        }, 1000);
+      }
+    }
+
+    function setTimerSecs(s) {
+      if (timerRunning) {
+        clearInterval(timerInterval);
+        timerRunning = false;
+      }
+      timerSeconds = s;
+      timerTotalSeconds = s;
+      updateTimerUI();
+      if (activeToolId === 'timer') renderTimerTool(document.getElementById('overlayContent'));
+    }
+
+    function setCustomTimer() {
+      const minInput = document.getElementById('customMin');
+      const secInput = document.getElementById('customSec');
+      const m = parseInt(minInput ? minInput.value : 0) || 0;
+      const s = parseInt(secInput ? secInput.value : 0) || 0;
+      setTimerSecs((m * 60) + s);
+    }
+
+    function updateTimerUI() {
+      updateTileDisplay('timer');
+
+      if (activeToolId === 'timer') {
+        const timeDisplay = document.getElementById('timerBigDisplay');
+        const circle = document.getElementById('timerProgressCircle');
+
+        if (timeDisplay) timeDisplay.textContent = formatTime(timerSeconds * 1000);
+        if (circle) {
+          const strokeOffset = 628 - (628 * (timerSeconds / (timerTotalSeconds || 1)));
+          circle.style.strokeDashoffset = strokeOffset;
+          if (timerSeconds / timerTotalSeconds <= 0.1) {
+            circle.style.stroke = 'var(--ptps-red)';
+          } else if (timerSeconds / timerTotalSeconds <= 0.25) {
+            circle.style.stroke = 'var(--ptps-yellow)';
+          } else {
+            circle.style.stroke = 'var(--ptps-lime)';
+          }
+        }
+      }
+    }
+
     // --- READY IN 30 SECONDS MODULE LOGIC ---
     function renderReady30Tool(container) {
       const cheerPhrase = getReady30Phrase(ready30Secs);
-      const strokeOffset = 565 - (565 * (ready30Secs / 30));
+      const strokeOffset = 628 - (628 * (ready30Secs / 30));
       const activeRuleIdx = getActiveRuleIndex(ready30Secs);
 
       container.innerHTML = `
         <div class="ready30-container">
           <div class="ready30-badge-header">READY IN 30 SECONDS!</div>
           
-          <div class="ready30-clock-wrapper">
-            <svg class="ready30-svg-ring" viewBox="0 0 200 200">
-              <circle class="ready30-svg-circle-bg" cx="100" cy="100" r="90" />
-              <circle class="ready30-svg-circle-progress" id="ready30ProgressCircle" cx="100" cy="100" r="90" style="stroke-dashoffset: ${strokeOffset};" />
+          <div class="ring-clock-wrapper">
+            <svg class="ring-svg" viewBox="0 0 220 220">
+              <circle class="ring-circle-bg" cx="110" cy="110" r="100" />
+              <circle class="ring-circle-progress" id="ready30ProgressCircle" cx="110" cy="110" r="100" style="stroke-dashoffset: ${strokeOffset};" />
             </svg>
-            <div class="ready30-time-text" id="ready30ClockText">${ready30Secs}</div>
+            <div class="ring-time-text" id="ready30ClockText">${ready30Secs}</div>
           </div>
 
           <div class="ready30-cheer-box">
@@ -1588,13 +1797,13 @@
 
           <div class="ready30-poster-rules">
             <div class="ready30-rule-card ${activeRuleIdx === 1 ? 'active-rule' : ''}">
-              <span class="diamond" style="color:#ef4444;">◆</span> Seated
+              <span class="diamond" style="color:var(--ptps-red);">◆</span> Seated
             </div>
             <div class="ready30-rule-card ${activeRuleIdx === 2 ? 'active-rule' : ''}">
-              <span class="diamond" style="color:#f59e0b;">◆</span> Materials Out
+              <span class="diamond" style="color:var(--ptps-yellow);">◆</span> Materials Out
             </div>
             <div class="ready30-rule-card ${activeRuleIdx === 3 ? 'active-rule' : ''}">
-              <span class="diamond" style="color:var(--ptps-lime);">◆</span> Eyes on the Teacher
+              <span class="diamond" style="color:var(--ptps-lime);">◆</span> Eyes on Teacher
             </div>
           </div>
 
@@ -1606,7 +1815,7 @@
           </div>
 
           <div class="ready30-banner-footer">
-            ✨ No Talking... Time to Learn! ✨
+            ✨ Quiet & Ready... Time to Learn! ✨
           </div>
         </div>
       `;
@@ -1615,15 +1824,15 @@
     function getReady30Phrase(secs) {
       if (secs > 22) return "Are you seated?";
       if (secs > 15) return "Have you taken all your materials out for lesson?";
-      if (secs > 7)  return "Have you kept all things that distract you from staying focus?";
+      if (secs > 7)  return "Have you kept all things that distract you from staying focused?";
       if (secs > 0)  return "Are your eyes on teacher?";
       return "Time's up! Eyes on teacher";
     }
 
     function getActiveRuleIndex(secs) {
-      if (secs > 22) return 1; // Seated
-      if (secs > 15) return 2; // Materials Out
-      if (secs > 0) return 3;  // Eyes on Teacher
+      if (secs > 22) return 1;
+      if (secs > 15) return 2;
+      if (secs > 0) return 3;
       return 3;
     }
 
@@ -1637,7 +1846,6 @@
         if (ready30Secs <= 0) ready30Secs = 30;
         ready30Running = true;
         
-        // Start Audio Cues
         playSound('start');
         speakText("Are you ready?");
 
@@ -1679,23 +1887,22 @@
           if (cheerElem.textContent !== newPhrase) {
             cheerElem.textContent = newPhrase;
             cheerElem.style.animation = 'none';
-            cheerElem.offsetHeight; // trigger reflow
+            cheerElem.offsetHeight;
             cheerElem.style.animation = 'cheer-pop 0.4s ease-out';
           }
         }
         if (circleElem) {
-          const strokeOffset = 565 - (565 * (ready30Secs / 30));
+          const strokeOffset = 628 - (628 * (ready30Secs / 30));
           circleElem.style.strokeDashoffset = strokeOffset;
           if (ready30Secs <= 5) {
-            circleElem.style.stroke = '#ef4444';
+            circleElem.style.stroke = 'var(--ptps-red)';
           } else if (ready30Secs <= 15) {
-            circleElem.style.stroke = '#f59e0b';
+            circleElem.style.stroke = 'var(--ptps-yellow)';
           } else {
             circleElem.style.stroke = 'var(--ptps-lime)';
           }
         }
 
-        // Re-render active rule highlighting on the overlay
         renderReady30Tool(document.getElementById('overlayContent'));
       }
     }
@@ -1754,7 +1961,7 @@
       if (disp) disp.textContent = vol + '%';
 
       if (vol > noiseThreshold) {
-        if (fill) fill.style.backgroundColor = '#ef4444';
+        if (fill) fill.style.backgroundColor = 'var(--ptps-red)';
         document.body.classList.add('noise-alert-active');
         if (banner) banner.style.display = 'block';
         if (overlay && activeToolId === 'noiseMeter') overlay.classList.add('loud-alert-active');
@@ -1864,50 +2071,6 @@
       }
     }
 
-    // --- TIMER LOGIC ---
-    function toggleTimer() {
-      if (timerRunning) {
-        clearInterval(timerInterval);
-        timerRunning = false;
-      } else {
-        if (timerSeconds <= 0) return;
-        timerRunning = true;
-        timerInterval = setInterval(() => {
-          if (timerSeconds > 0) {
-            timerSeconds--;
-            const d = document.getElementById('timerBigDisplay');
-            if (d) d.textContent = formatTime(timerSeconds * 1000);
-            updateTileDisplay('timer');
-          } else {
-            clearInterval(timerInterval);
-            timerRunning = false;
-            playSound('buzzer');
-          }
-        }, 1000);
-      }
-      if (activeToolId === 'timer') renderToolContent('timer', document.getElementById('overlayTitle'), document.getElementById('overlayContent'));
-    }
-
-    function setTimerSecs(s) {
-      if (timerRunning) {
-        clearInterval(timerInterval);
-        timerRunning = false;
-      }
-      timerSeconds = s;
-      const d = document.getElementById('timerBigDisplay');
-      if (d) d.textContent = formatTime(timerSeconds * 1000);
-      updateTileDisplay('timer');
-      if (activeToolId === 'timer') renderToolContent('timer', document.getElementById('overlayTitle'), document.getElementById('overlayContent'));
-    }
-
-    function setCustomTimer() {
-      const minInput = document.getElementById('customMin');
-      const secInput = document.getElementById('customSec');
-      const m = parseInt(minInput ? minInput.value : 0) || 0;
-      const s = parseInt(secInput ? secInput.value : 0) || 0;
-      setTimerSecs((m * 60) + s);
-    }
-
     // --- STOPWATCH LOGIC ---
     function toggleStopwatch() {
       if (stopwatchRunning) {
@@ -1963,7 +2126,7 @@
       }
 
       let html = `
-        <p style="color: var(--ptps-gray); font-size: 0.85rem; margin-bottom: 0.75rem; text-align: center;">
+        <p style="color: var(--ptps-text-muted); font-size: 0.85rem; font-weight: 700; margin-bottom: 0.75rem; text-align: center;">
           💡 Drag and drop student badges between group boxes to manually adjust teams.
         </p>
 
@@ -2093,10 +2256,10 @@
 
       let html = `
         <div style="margin-bottom: 1.25rem; display: flex; gap: 0.5rem; align-items: center; justify-content: center; flex-wrap: wrap; width:100%; max-width:400px;">
-          <button class="control-btn" style="font-size: 0.95rem; background: var(--ptps-lime); color: var(--ptps-bg-dark);" onclick="markAllPresent()">✓ All Present</button>
+          <button class="control-btn" style="font-size: 0.95rem; background: var(--ptps-lime);" onclick="markAllPresent()">✓ All Present</button>
           <button class="control-btn danger" style="font-size: 0.95rem;" onclick="markAllAbsent()">✕ All Absent</button>
         </div>
-        <div style="margin-bottom: 1rem; color: var(--ptps-gray); font-size: 0.95rem; text-align: center;">
+        <div style="margin-bottom: 1rem; color: var(--ptps-text-muted); font-size: 1rem; font-weight:800; text-align: center;">
           Present: <strong style="color:var(--ptps-lime);">${presentCount}/${total}</strong> (${percent}%)
         </div>
         <div class="interactive-list">
@@ -2106,7 +2269,7 @@
         const isPresent = attendanceStatus[name] !== false;
         html += `
           <div class="list-item">
-            <span style="font-size: 1.05rem; font-weight: 500;">${name}</span>
+            <span style="font-size: 1.05rem; font-weight: 800;">${name}</span>
             <button class="control-btn ${isPresent ? '' : 'danger'}" 
                     style="font-size: 0.85rem; padding: 0.35rem 0.9rem; margin: 0; width: auto; min-width: 95px;" 
                     onclick="toggleStudentAttendance('${name}')">
@@ -2153,19 +2316,19 @@
       syncSeatingArrangement();
 
       let html = `
-        <div style="margin-bottom: 1rem; display: flex; gap: 0.75rem; align-items: center; justify-content: center; background: var(--ptps-card-bg); padding: 0.75rem; border-radius: 1rem; border: 1px solid var(--ptps-card-border); flex-wrap: wrap;">
-          <label style="color:var(--ptps-gray); font-size:0.9rem;">Rows: 
+        <div style="margin-bottom: 1rem; display: flex; gap: 0.75rem; align-items: center; justify-content: center; background: var(--ptps-card-bg); padding: 0.75rem 1.25rem; border-radius: 1.25rem; border: 3px solid var(--ptps-card-border); flex-wrap: wrap; box-shadow: var(--ptps-shadow);">
+          <label style="color:var(--ptps-text-muted); font-size:0.9rem; font-weight:800;">Rows: 
             <input type="number" id="seatRowsInput" value="${seatingRows}" min="1" max="10" style="width:55px; text-align:center;" />
           </label>
-          <span style="color:var(--ptps-gray);">x</span>
-          <label style="color:var(--ptps-gray); font-size:0.9rem;">Cols: 
+          <span style="color:var(--ptps-text-muted); font-weight:bold;">x</span>
+          <label style="color:var(--ptps-text-muted); font-size:0.9rem; font-weight:800;">Cols: 
             <input type="number" id="seatColsInput" value="${seatingCols}" min="1" max="10" style="width:55px; text-align:center;" />
           </label>
           <button class="control-btn" style="font-size: 0.85rem; padding: 0.4rem 0.8rem; margin:0; width:auto;" onclick="updateSeatingGridDimensions()">Set</button>
           <button class="control-btn secondary" style="font-size: 0.85rem; padding: 0.4rem 0.8rem; margin:0; width:auto;" onclick="resetSeatingArrangement()">Auto-Fill</button>
         </div>
 
-        <p style="color: var(--ptps-gray); font-size: 0.85rem; margin-bottom: 1rem; text-align: center;">
+        <p style="color: var(--ptps-text-muted); font-size: 0.85rem; font-weight:700; margin-bottom: 1rem; text-align: center;">
           💡 Drag desks to customize student placement.
         </p>
 
@@ -2185,8 +2348,8 @@
                ondragleave="handleDeskDragLeave(event)"
                ondrop="handleDeskDrop(event, ${i})"
                ondragend="handleDeskDragEnd(event)">
-            <span style="font-size: 0.7rem; color: var(--ptps-gray);">Desk ${i+1}</span>
-            <strong style="color: ${isEmpty ? 'var(--ptps-gray)' : 'var(--ptps-turquoise)'}; font-size:0.9rem; margin-top:0.15rem;">
+            <span style="font-size: 0.7rem; font-weight: 800; color: var(--ptps-text-muted);">Desk ${i+1}</span>
+            <strong style="color: ${isEmpty ? 'var(--ptps-text-muted)' : 'var(--ptps-turquoise)'}; font-size:0.95rem; margin-top:0.15rem;">
               ${studentName}
             </strong>
           </div>
@@ -2257,7 +2420,7 @@
           <input type="text" id="newScheduleActivity" placeholder="Activity name..." style="flex: 1; min-width:180px;" onkeypress="if(event.key==='Enter') addScheduleItem()" />
           <button class="control-btn" style="font-size: 0.9rem; padding: 0.5rem 1rem; margin: 0; width:auto;" onclick="addScheduleItem()">+ Add</button>
         </div>
-        <p style="color: var(--ptps-gray); font-size: 0.8rem; margin-bottom: 0.5rem; text-align: center;">💡 Drag items up/down to customize schedule order.</p>
+        <p style="color: var(--ptps-text-muted); font-size: 0.8rem; font-weight:700; margin-bottom: 0.5rem; text-align: center;">💡 Drag items up/down to customize schedule order.</p>
         <div class="interactive-list">
       `;
 
@@ -2269,9 +2432,9 @@
                ondragover="handleScheduleDragOver(event)" 
                ondragleave="handleScheduleDragLeave(event)" 
                ondrop="handleScheduleDrop(event, ${idx})">
-            <span style="color: var(--ptps-gray); cursor: grab; font-size: 0.9rem;">⋮⋮</span>
-            <input type="text" value="${item.time}" onchange="updateScheduleItem(${idx}, 'time', this.value)" style="width: 100px; background: var(--ptps-bg-dark); border: 1px solid var(--ptps-card-border); color: var(--ptps-turquoise); font-weight: bold; border-radius: 0.4rem; padding: 0.35rem; text-align: center; font-size:0.85rem;" />
-            <input type="text" value="${item.activity}" onchange="updateScheduleItem(${idx}, 'activity', this.value)" style="flex: 1; background: transparent; border: none; color: #fff; font-size: 0.95rem;" />
+            <span style="color: var(--ptps-text-muted); cursor: grab; font-size: 0.9rem;">⋮⋮</span>
+            <input type="text" value="${item.time}" onchange="updateScheduleItem(${idx}, 'time', this.value)" style="width: 100px; background: var(--ptps-bg-canvas); border: 2px solid var(--ptps-card-border); color: var(--ptps-turquoise); font-weight: bold; border-radius: 0.5rem; padding: 0.35rem; text-align: center; font-size:0.85rem;" />
+            <input type="text" value="${item.activity}" onchange="updateScheduleItem(${idx}, 'activity', this.value)" style="flex: 1; background: transparent; border: none; color: var(--ptps-text-dark); font-weight:800; font-size: 0.95rem;" />
             <button class="btn-close" style="padding: 0.2rem 0.5rem; font-size: 0.75rem;" onclick="removeScheduleItem(${idx})">✕</button>
           </div>
         `;
@@ -2337,7 +2500,7 @@
           <input type="text" id="newCheckitemText" placeholder="Add task..." style="flex: 1; min-width:180px;" onkeypress="if(event.key==='Enter') addChecklistItem()" />
           <button class="control-btn" style="font-size: 0.9rem; padding: 0.5rem 1rem; margin: 0; width:auto;" onclick="addChecklistItem()">+ Add</button>
         </div>
-        <p style="color: var(--ptps-gray); font-size: 0.8rem; margin-bottom: 0.5rem; text-align: center;">💡 Drag items to reorder priority.</p>
+        <p style="color: var(--ptps-text-muted); font-size: 0.8rem; font-weight:700; margin-bottom: 0.5rem; text-align: center;">💡 Drag items to reorder priority.</p>
         <div class="interactive-list">
       `;
 
@@ -2349,9 +2512,9 @@
                ondragover="handleChecklistDragOver(event)" 
                ondragleave="handleChecklistDragLeave(event)" 
                ondrop="handleChecklistDrop(event, ${idx})">
-            <span style="color: var(--ptps-gray); cursor: grab; font-size: 0.9rem;">⋮⋮</span>
+            <span style="color: var(--ptps-text-muted); cursor: grab; font-size: 0.9rem;">⋮⋮</span>
             <input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggleCheck(${idx})" style="width: 20px; height: 20px; cursor: pointer; accent-color: var(--ptps-turquoise);" />
-            <input type="text" value="${item.text}" onchange="updateChecklistText(${idx}, this.value)" style="flex:1; background:transparent; border:none; color:#fff; font-size:0.95rem; ${item.done ? 'text-decoration: line-through; opacity: 0.5;' : ''}" />
+            <input type="text" value="${item.text}" onchange="updateChecklistText(${idx}, this.value)" style="flex:1; background:transparent; border:none; color:var(--ptps-text-dark); font-weight:800; font-size:0.95rem; ${item.done ? 'text-decoration: line-through; opacity: 0.5;' : ''}" />
             <button class="btn-close" style="padding: 0.2rem 0.5rem; font-size: 0.75rem;" onclick="removeChecklistItem(${idx})">✕</button>
           </div>
         `;
@@ -2416,12 +2579,12 @@
     function renderBackgroundMusic(container) {
       let html = `
         <div style="margin-bottom: 1.25rem; text-align: center; width:100%;">
-          <p style="font-size: 1.15rem; color: var(--ptps-lime); font-weight: 700; margin-bottom: 0.5rem;">
+          <p style="font-size: 1.15rem; color: var(--ptps-lime); font-weight: 800; margin-bottom: 0.5rem;">
             ${isMusicPlaying ? `▶️ Synthesizing: ${currentMusicTrackName}` : '⏹️ Music Stopped'}
           </p>
           <div style="display: flex; gap: 1rem; align-items: center; justify-content: center; flex-wrap: wrap;">
             <button class="control-btn danger" style="width:auto; padding: 0.5rem 1.2rem;" onclick="stopBgMusic()">Stop Music</button>
-            <label style="color:var(--ptps-gray); font-size:0.9rem; display: flex; align-items: center; gap: 0.5rem;">Volume: 
+            <label style="color:var(--ptps-text-muted); font-weight:700; font-size:0.9rem; display: flex; align-items: center; gap: 0.5rem;">Volume: 
               <input type="range" min="0" max="1" step="0.05" value="${musicVolume}" oninput="setMusicVolume(this.value)" style="width: 120px;" />
             </label>
           </div>
@@ -2436,12 +2599,12 @@
 
         html += `<div class="music-card">
           <div class="music-card-title">${catIcon} ${category}</div>
-          <p style="font-size: 0.75rem; color: var(--ptps-gray); margin-bottom: 0.75rem;">${subTitle}</p>`;
+          <p style="font-size: 0.75rem; color: var(--ptps-text-muted); font-weight:700; margin-bottom: 0.75rem;">${subTitle}</p>`;
 
         midiMusicCatalog[category].forEach(trackObj => {
           const active = isMusicPlaying && currentMusicTrackName === trackObj.name;
           html += `
-            <button class="control-btn preset" style="width:100%; margin:0.3rem 0; text-align:left; display: flex; justify-content: space-between; align-items: center; ${active ? 'background:var(--ptps-lime); color:var(--ptps-bg-dark); font-weight:bold;' : ''}" 
+            <button class="control-btn preset" style="width:100%; margin:0.3rem 0; text-align:left; display: flex; justify-content: space-between; align-items: center; ${active ? 'background:var(--ptps-lime); color:#FFFFFF; font-weight:bold;' : ''}" 
               onclick='startSynthesizedMidiLoop("${category}", ${JSON.stringify(trackObj)})'>
               <span>${active ? '▶ ' : '🎵 '}${trackObj.name}</span>
               <span style="font-size:0.75rem; opacity:0.8;">🔂 30s Loop</span>
@@ -2474,6 +2637,7 @@
 
     // --- INITIALIZATION ---
     window.addEventListener('DOMContentLoaded', () => {
+      loadSavedThemeMode();
       loadSavedRoster();
       loadDeviceViewChoice();
       loadSavedTileOrder();
