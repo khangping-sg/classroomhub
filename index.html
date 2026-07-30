@@ -576,6 +576,63 @@
       100% { background: rgba(254, 202, 202, 0.95); }
     }
 
+    /* GLOBAL FLASHING ALERT OVERLAY (TIME'S UP) */
+    .global-flash-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 99999;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      background: rgba(239, 68, 68, 0.95);
+      animation: global-flash 0.35s infinite alternate ease-in-out;
+    }
+
+    .global-flash-overlay.active {
+      display: flex;
+    }
+
+    @keyframes global-flash {
+      0% { background: rgba(239, 68, 68, 0.95); }
+      100% { background: rgba(245, 158, 11, 0.95); }
+    }
+
+    .alert-modal-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: rgba(15, 23, 42, 0.88);
+      padding: 3rem;
+      border-radius: 2rem;
+      border: 4px solid #FFFFFF;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+      text-align: center;
+      max-width: 90%;
+    }
+
+    .btn-dismiss-alert {
+      background: #22C55E;
+      color: #FFFFFF;
+      border: 3px solid #FFFFFF;
+      font-size: 1.8rem;
+      font-weight: 900;
+      padding: 1.25rem 2.5rem;
+      border-radius: 3rem;
+      cursor: pointer;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+      transition: all 0.2s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .btn-dismiss-alert:hover {
+      transform: scale(1.08);
+      background: #16A34A;
+    }
+
     .fullscreen-header {
       display: flex;
       justify-content: space-between;
@@ -722,7 +779,7 @@
       z-index: 2;
     }
 
-    /* Traffic Light */
+    /* Traffic Light & Working Modes */
     .traffic-light-box {
       background: #0F172A;
       padding: 1.5rem;
@@ -744,6 +801,51 @@
     .light-bulb.yellow { background: var(--ptps-yellow); box-shadow: 0 0 30px var(--ptps-yellow); }
     .light-bulb.green { background: var(--ptps-lime); box-shadow: 0 0 30px var(--ptps-lime); }
     .light-bulb.active { opacity: 1; transform: scale(1.1); }
+
+    .working-mode-btn {
+      background: var(--ptps-card-bg);
+      border: 3px solid var(--ptps-card-border);
+      color: var(--ptps-text-dark);
+      padding: 1rem 1.25rem;
+      border-radius: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.3rem;
+      cursor: pointer;
+      flex: 1;
+      min-width: 140px;
+      transition: all 0.2s ease;
+      box-shadow: var(--ptps-shadow);
+    }
+    .working-mode-btn:hover {
+      transform: translateY(-3px);
+      border-color: var(--ptps-turquoise);
+    }
+    .working-mode-btn.active.red {
+      background: rgba(255, 77, 77, 0.15);
+      border-color: var(--ptps-red);
+      color: var(--ptps-red);
+      box-shadow: 0 4px 15px rgba(255, 77, 77, 0.3);
+    }
+    .working-mode-btn.active.yellow {
+      background: rgba(255, 184, 0, 0.15);
+      border-color: var(--ptps-yellow);
+      color: #D97706;
+      box-shadow: 0 4px 15px rgba(255, 184, 0, 0.3);
+    }
+    .working-mode-btn.active.green {
+      background: rgba(107, 179, 24, 0.15);
+      border-color: var(--ptps-lime);
+      color: var(--ptps-lime-dark);
+      box-shadow: 0 4px 15px rgba(107, 179, 24, 0.3);
+    }
+    .mode-tag {
+      font-size: 0.75rem;
+      font-weight: 800;
+      opacity: 0.8;
+      text-transform: uppercase;
+    }
 
     /* Interactive List Container */
     .interactive-list {
@@ -914,6 +1016,15 @@
 </head>
 <body class="view-pc">
 
+  <!-- FULLSCREEN FLASHING ALERT OVERLAY -->
+  <div id="globalFlashOverlay" class="global-flash-overlay">
+    <div class="alert-modal-content">
+      <div style="font-size: 4.5rem; margin-bottom: 0.5rem;">⏰</div>
+      <h2 style="font-size: 3.2rem; font-weight: 900; color: #FFFFFF; text-shadow: 0 4px 10px rgba(0,0,0,0.5); margin-bottom: 1.8rem; text-align: center;">TIME'S UP!</h2>
+      <button class="btn-dismiss-alert" onclick="dismissTimesUpAlert()">DISMISS / STOP ALERT</button>
+    </div>
+  </div>
+
   <header>
     <div class="header-title-group">
       <div class="school-logo-badge">PTPS</div>
@@ -1076,31 +1187,6 @@
         gain.gain.setValueAtTime(0.4, now);
         gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
         osc.start(now); osc.stop(now + 0.5);
-      } else if (type === 'loudAlert') {
-        // High Pitch (17.4 kHz - >16000Hz embedded)
-        const highOsc = audioCtx.createOscillator();
-        const highGain = audioCtx.createGain();
-        highOsc.type = 'sine';
-        highOsc.frequency.setValueAtTime(17400, now);
-        highGain.gain.setValueAtTime(0.5, now);
-        highGain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
-        highOsc.connect(highGain);
-        highGain.connect(audioCtx.destination);
-        highOsc.start(now);
-        highOsc.stop(now + 0.5);
-
-        // Adult Frequency Backup
-        const adultOsc = audioCtx.createOscillator();
-        const adultGain = audioCtx.createGain();
-        adultOsc.type = 'triangle';
-        adultOsc.frequency.setValueAtTime(800, now);
-        adultOsc.frequency.exponentialRampToValueAtTime(400, now + 0.4);
-        adultGain.gain.setValueAtTime(0.4, now);
-        adultGain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
-        adultOsc.connect(adultGain);
-        adultGain.connect(audioCtx.destination);
-        adultOsc.start(now);
-        adultOsc.stop(now + 0.4);
       } else if (type === 'tada') {
         [523.25, 659.25, 783.99, 1046.5].forEach((freq, idx) => {
           const o = audioCtx.createOscillator();
@@ -1112,6 +1198,106 @@
           o.start(now + idx * 0.08); o.stop(now + idx * 0.08 + 0.3);
         });
       }
+    }
+
+    // --- TIME'S UP ENHANCED ALERT SYSTEM ---
+    let isAlertSequenceRunning = false;
+
+    function triggerTimesUpAlert() {
+      // 1. Show global full screen flashing alert
+      const overlay = document.getElementById('globalFlashOverlay');
+      if (overlay) overlay.classList.add('active');
+
+      // 2. Start sound sequence flag
+      isAlertSequenceRunning = true;
+      runTimesUpAlertSequence();
+    }
+
+    function dismissTimesUpAlert() {
+      isAlertSequenceRunning = false;
+      
+      // Immediately cancel Web Speech API
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+
+      // Hide global full screen flashing alert
+      const overlay = document.getElementById('globalFlashOverlay');
+      if (overlay) overlay.classList.remove('active');
+    }
+
+    async function runTimesUpAlertSequence() {
+      for (let i = 0; i < 8; i++) {
+        if (!isAlertSequenceRunning) break;
+        // Dual-tone Ding Dong (659 Hz -> 523 Hz)
+        await playDualToneDingDong();
+        
+        if (!isAlertSequenceRunning) break;
+        // Speech "Time's Up!"
+        await speakTimesUpPromise();
+        
+        if (!isAlertSequenceRunning) break;
+        // Brief pause between repetitions
+        await new Promise(r => setTimeout(r, 350));
+      }
+    }
+
+    function playDualToneDingDong() {
+      return new Promise((resolve) => {
+        if (!isAlertSequenceRunning) return resolve();
+        initAudio();
+        const now = audioCtx.currentTime;
+
+        // Tone 1: High Tone (659 Hz - E5)
+        const osc1 = audioCtx.createOscillator();
+        const gain1 = audioCtx.createGain();
+        osc1.type = 'sine';
+        osc1.frequency.setValueAtTime(659, now);
+        gain1.gain.setValueAtTime(0.6, now);
+        gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.55);
+        osc1.connect(gain1); gain1.connect(audioCtx.destination);
+        osc1.start(now); osc1.stop(now + 0.55);
+
+        // Tone 2: Low Tone (523 Hz - C5) starting at 0.35s
+        const osc2 = audioCtx.createOscillator();
+        const gain2 = audioCtx.createGain();
+        osc2.type = 'sine';
+        osc2.frequency.setValueAtTime(523, now + 0.35);
+        gain2.gain.setValueAtTime(0.7, now + 0.35);
+        gain2.gain.exponentialRampToValueAtTime(0.001, now + 1.25);
+        osc2.connect(gain2); gain2.connect(audioCtx.destination);
+        osc2.start(now + 0.35); osc2.stop(now + 1.25);
+
+        setTimeout(() => {
+          resolve();
+        }, 1250);
+      });
+    }
+
+    function speakTimesUpPromise() {
+      return new Promise((resolve) => {
+        if (!isAlertSequenceRunning || !('speechSynthesis' in window)) {
+          return resolve();
+        }
+        window.speechSynthesis.cancel();
+        const msg = new SpeechSynthesisUtterance("Time's Up!");
+        msg.rate = 1.0;
+        msg.pitch = 1.1;
+
+        let resolved = false;
+        const finish = () => {
+          if (!resolved) {
+            resolved = true;
+            resolve();
+          }
+        };
+
+        msg.onend = finish;
+        msg.onerror = finish;
+        setTimeout(finish, 2200); // safety fallback
+
+        window.speechSynthesis.speak(msg);
+      });
     }
 
     // --- SYNTHESIZED 30-SECOND MIDI MUSIC LOOP ENGINE ---
@@ -1254,12 +1440,15 @@
     let timeLossStartMark = 0;
     let timeLossInterval = null;
 
-    // Noise Meter State
+    // Noise Meter State & Custom Audio Engines
     let micStream = null;
     let analyser = null;
     let noiseThreshold = 65;
     let isNoiseActive = false;
-    let lastNoiseAlertTime = 0;
+    let noiseHighFreqOsc = null;
+    let noiseHighFreqGain = null;
+    let noiseBuzzerActive = false;
+    let noiseBuzzerLoopTimeout = null;
 
     // Countdown Timer State
     let timerSeconds = 300;
@@ -1337,6 +1526,22 @@
       renderDashboardGrid();
     }
 
+    function formatTime(ms) {
+      const totalSecs = Math.floor(ms / 1000);
+      const mins = Math.floor(totalSecs / 60);
+      const secs = totalSecs % 60;
+      return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    function updateTileDisplay(toolId) {
+      const def = toolDefinitions[toolId];
+      if (!def) return;
+      const dispElem = document.getElementById(`grid_${toolId}_display`);
+      const subElem = document.getElementById(`grid_${toolId}_subtext`);
+      if (dispElem) dispElem.innerHTML = def.getDisplay();
+      if (subElem) subElem.textContent = def.getSubtext();
+    }
+
     const toolDefinitions = {
       ready30: {
         title: "⚡ Ready in 30s!",
@@ -1376,9 +1581,9 @@
         getSubtext: () => "ELAPSED TIME"
       },
       traffic: {
-        title: "🚦 Traffic Light",
+        title: "🚦 Working Mode Light",
         getDisplay: () => ({ red: '🔴', yellow: '🟡', green: '🟢' }[currentLight]),
-        getSubtext: () => "WORK STATE"
+        getSubtext: () => ({ red: 'SILENCE', yellow: 'WHISPER', green: 'WORK TOGETHER' }[currentLight])
       },
       groups: {
         title: "👥 Group Maker",
@@ -1613,16 +1818,42 @@
         `;
       }
       else if (toolId === 'traffic') {
-        titleElem.textContent = '🚦 Traffic Light';
+        titleElem.textContent = '🚦 Working Mode & Traffic Light';
         contentElem.innerHTML = `
-          <div class="traffic-light-box">
-            <div class="light-bulb red ${currentLight==='red'?'active':''}" onclick="setLight('red')"></div>
-            <div class="light-bulb yellow ${currentLight==='yellow'?'active':''}" onclick="setLight('yellow')"></div>
-            <div class="light-bulb green ${currentLight==='green'?'active':''}" onclick="setLight('green')"></div>
+          <div style="display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 650px;">
+            <div class="traffic-light-box" style="margin-bottom: 2rem;">
+              <div class="light-bulb red ${currentLight==='red'?'active':''}" onclick="setLight('red')" title="Silence Mode"></div>
+              <div class="light-bulb yellow ${currentLight==='yellow'?'active':''}" onclick="setLight('yellow')" title="Whisper Mode"></div>
+              <div class="light-bulb green ${currentLight==='green'?'active':''}" onclick="setLight('green')" title="Work Together Mode"></div>
+            </div>
+
+            <p style="font-size: 0.9rem; font-weight: 800; color: var(--ptps-text-muted); margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">Click a Working Mode:</p>
+            
+            <div style="display: flex; gap: 0.75rem; width: 100%; justify-content: center; flex-wrap: wrap; margin-bottom: 1.5rem;">
+              <button class="working-mode-btn ${currentLight === 'red' ? 'active red' : ''}" onclick="setWorkingMode('Silence')">
+                <span style="font-size: 1.6rem;">🤫</span>
+                <strong style="font-size: 1.1rem;">Silence</strong>
+                <span class="mode-tag">Red Light</span>
+              </button>
+              <button class="working-mode-btn ${currentLight === 'yellow' ? 'active yellow' : ''}" onclick="setWorkingMode('Whisper')">
+                <span style="font-size: 1.6rem;">💬</span>
+                <strong style="font-size: 1.1rem;">Whisper</strong>
+                <span class="mode-tag">Yellow Light</span>
+              </button>
+              <button class="working-mode-btn ${currentLight === 'green' ? 'active green' : ''}" onclick="setWorkingMode('Work Together')">
+                <span style="font-size: 1.6rem;">👥</span>
+                <strong style="font-size: 1.1rem;">Work Together</strong>
+                <span class="mode-tag">Green Light</span>
+              </button>
+            </div>
+
+            <div style="background: var(--ptps-card-bg); border: 3px solid var(--ptps-card-border); padding: 1.25rem 2rem; border-radius: 1.25rem; text-align: center; box-shadow: var(--ptps-shadow); width: 100%;">
+              <div style="font-size: 0.85rem; font-weight: 800; color: var(--ptps-text-muted); text-transform: uppercase;">Active Classroom Working Mode</div>
+              <div style="font-size: 1.85rem; font-weight: 900; margin-top: 0.3rem; color: ${currentLight === 'red' ? 'var(--ptps-red)' : currentLight === 'yellow' ? '#D97706' : 'var(--ptps-lime-dark)'};">
+                ${currentLight === 'red' ? '🤫 SILENCE' : currentLight === 'yellow' ? '💬 WHISPER' : '👥 WORK TOGETHER'}
+              </div>
+            </div>
           </div>
-          <p style="margin-top: 2rem; font-size: 1.35rem; font-weight: 800; text-transform: uppercase; color: var(--ptps-turquoise);" id="lightStatus">
-            ${currentLight === 'red' ? 'Silence / Stop' : currentLight === 'yellow' ? 'Whisper / Transition' : 'Group Work / Go'}
-          </p>
         `;
       }
       else if (toolId === 'groups') {
@@ -1725,8 +1956,8 @@
           } else {
             clearInterval(timerInterval);
             timerRunning = false;
-            playSound('buzzer');
             updateTimerUI();
+            triggerTimesUpAlert();
           }
         }, 1000);
       }
@@ -1858,9 +2089,8 @@
           } else {
             clearInterval(ready30Interval);
             ready30Running = false;
-            playSound('tada');
-            speakText("Time's up! Eyes on teacher");
             updateReady30UI();
+            triggerTimesUpAlert();
           }
         }, 1000);
       }
@@ -1907,7 +2137,7 @@
       }
     }
 
-    // --- NOISE METER LOGIC ---
+    // --- NOISE METER LOGIC & AUDIO ENGINES ---
     async function toggleNoiseMic() {
       if (!isNoiseActive) {
         try {
@@ -1927,6 +2157,7 @@
       } else {
         isNoiseActive = false;
         if (micStream) micStream.getTracks().forEach(t => t.stop());
+        stopNoiseAlertSounds();
         updateTileDisplay('noiseMeter');
         document.body.classList.remove('noise-alert-active');
         const overlay = document.getElementById('fullscreenOverlay');
@@ -1941,6 +2172,73 @@
       if (line) line.style.left = val + '%';
       const lbl = document.getElementById('threshVal');
       if (lbl) lbl.textContent = val;
+    }
+
+    function start17kTone() {
+      if (!noiseHighFreqOsc && audioCtx) {
+        noiseHighFreqOsc = audioCtx.createOscillator();
+        noiseHighFreqGain = audioCtx.createGain();
+        noiseHighFreqOsc.type = 'sine';
+        noiseHighFreqOsc.frequency.setValueAtTime(17500, audioCtx.currentTime); // 17.5 kHz Tone
+        noiseHighFreqGain.gain.setValueAtTime(0.35, audioCtx.currentTime);
+        noiseHighFreqOsc.connect(noiseHighFreqGain);
+        noiseHighFreqGain.connect(audioCtx.destination);
+        noiseHighFreqOsc.start();
+      }
+    }
+
+    function startNoiseBuzzerLoop() {
+      if (noiseBuzzerActive) return;
+      noiseBuzzerActive = true;
+      runBuzzerCycle();
+    }
+
+    function runBuzzerCycle() {
+      if (!isNoiseActive || !noiseBuzzerActive) return;
+
+      playAdultBuzzer2s();
+
+      // Cycle runs every 2.4s (2s sound + brief pause) while noise persists
+      noiseBuzzerLoopTimeout = setTimeout(() => {
+        if (noiseBuzzerActive && isNoiseActive) {
+          runBuzzerCycle();
+        }
+      }, 2400);
+    }
+
+    function playAdultBuzzer2s() {
+      initAudio();
+      const now = audioCtx.currentTime;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(220, now);
+      osc.frequency.linearRampToValueAtTime(180, now + 2.0);
+
+      gain.gain.setValueAtTime(0.4, now);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 2.0);
+
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start(now);
+      osc.stop(now + 2.0);
+    }
+
+    function stopNoiseAlertSounds() {
+      if (noiseHighFreqOsc) {
+        try {
+          noiseHighFreqOsc.stop();
+          noiseHighFreqOsc.disconnect();
+        } catch(e) {}
+        noiseHighFreqOsc = null;
+        noiseHighFreqGain = null;
+      }
+      
+      noiseBuzzerActive = false;
+      if (noiseBuzzerLoopTimeout) {
+        clearTimeout(noiseBuzzerLoopTimeout);
+        noiseBuzzerLoopTimeout = null;
+      }
     }
 
     function startMicProcessing() {
@@ -1966,16 +2264,15 @@
         if (banner) banner.style.display = 'block';
         if (overlay && activeToolId === 'noiseMeter') overlay.classList.add('loud-alert-active');
 
-        const now = Date.now();
-        if (now - lastNoiseAlertTime > 1500) {
-          playSound('loudAlert');
-          lastNoiseAlertTime = now;
-        }
+        start17kTone();
+        startNoiseBuzzerLoop();
       } else {
         if (fill) fill.style.backgroundColor = 'var(--ptps-lime)';
         document.body.classList.remove('noise-alert-active');
         if (banner) banner.style.display = 'none';
         if (overlay) overlay.classList.remove('loud-alert-active');
+
+        stopNoiseAlertSounds();
       }
 
       if (isNoiseActive) requestAnimationFrame(startMicProcessing);
@@ -2095,11 +2392,23 @@
       if (activeToolId === 'stopwatch') renderToolContent('stopwatch', document.getElementById('overlayTitle'), document.getElementById('overlayContent'));
     }
 
-    // --- TRAFFIC LIGHT LOGIC ---
+    // --- TRAFFIC LIGHT & WORKING MODE LOGIC ---
     function setLight(color) {
       currentLight = color;
       updateTileDisplay('traffic');
-      if (activeToolId === 'traffic') renderToolContent('traffic', document.getElementById('overlayTitle'), document.getElementById('overlayContent'));
+      if (activeToolId === 'traffic') {
+        renderToolContent('traffic', document.getElementById('overlayTitle'), document.getElementById('overlayContent'));
+      }
+    }
+
+    function setWorkingMode(mode) {
+      if (mode === 'Silence') {
+        setLight('red');
+      } else if (mode === 'Whisper') {
+        setLight('yellow');
+      } else if (mode === 'Work Together') {
+        setLight('green');
+      }
     }
 
     // --- GROUP MAKER WITH DRAG & DROP ADJUSTMENTS ---
@@ -2579,66 +2888,49 @@
     function renderBackgroundMusic(container) {
       let html = `
         <div style="margin-bottom: 1.25rem; text-align: center; width:100%;">
-          <p style="font-size: 1.15rem; color: var(--ptps-lime); font-weight: 800; margin-bottom: 0.5rem;">
-            ${isMusicPlaying ? `▶️ Synthesizing: ${currentMusicTrackName}` : '⏹️ Music Stopped'}
+          <p style="color: var(--ptps-text-muted); font-size: 0.95rem; font-weight: 700; margin-bottom: 1rem;">
+            Currently Playing: <strong>${isMusicPlaying ? `${currentMusicCategory} - ${currentMusicTrackName}` : 'None'}</strong>
           </p>
-          <div style="display: flex; gap: 1rem; align-items: center; justify-content: center; flex-wrap: wrap;">
-            <button class="control-btn danger" style="width:auto; padding: 0.5rem 1.2rem;" onclick="stopBgMusic()">Stop Music</button>
-            <label style="color:var(--ptps-text-muted); font-weight:700; font-size:0.9rem; display: flex; align-items: center; gap: 0.5rem;">Volume: 
-              <input type="range" min="0" max="1" step="0.05" value="${musicVolume}" oninput="setMusicVolume(this.value)" style="width: 120px;" />
-            </label>
+          <div style="display: flex; gap: 0.75rem; align-items: center; justify-content: center; margin-bottom: 1.5rem; flex-wrap: wrap;">
+            <button class="control-btn danger" onclick="stopBgMusic()" ${!isMusicPlaying ? 'disabled style="opacity:0.5; cursor:not-allowed;"' : ''}>⏹️ Stop Music</button>
+            <div style="display: flex; align-items: center; gap: 0.5rem; background: var(--ptps-card-bg); padding: 0.4rem 0.8rem; border-radius: 1rem; border: 2px solid var(--ptps-card-border);">
+              <span style="font-size: 0.85rem; font-weight: 800;">🔊 Vol:</span>
+              <input type="range" min="0" max="1" step="0.05" value="${musicVolume}" oninput="setMusicVolume(this.value)" style="width: 100px;" />
+            </div>
           </div>
         </div>
-
         <div class="music-grid">
       `;
 
-      for (let category in midiMusicCatalog) {
-        const catIcon = category === 'Hype' ? '🔥' : '🎹';
-        const subTitle = category === 'Hype' ? 'Upbeat & Active (5 Loops)' : 'Soothing Ambient (5 Loops)';
-
-        html += `<div class="music-card">
-          <div class="music-card-title">${catIcon} ${category}</div>
-          <p style="font-size: 0.75rem; color: var(--ptps-text-muted); font-weight:700; margin-bottom: 0.75rem;">${subTitle}</p>`;
-
-        midiMusicCatalog[category].forEach(trackObj => {
-          const active = isMusicPlaying && currentMusicTrackName === trackObj.name;
+      for (const [cat, tracks] of Object.entries(midiMusicCatalog)) {
+        html += `
+          <div class="music-card">
+            <div class="music-card-title">${cat === 'Hype' ? '⚡' : '🧘'} ${cat} Loops</div>
+            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+        `;
+        tracks.forEach(t => {
+          const isThisPlaying = isMusicPlaying && currentMusicTrackName === t.name;
           html += `
-            <button class="control-btn preset" style="width:100%; margin:0.3rem 0; text-align:left; display: flex; justify-content: space-between; align-items: center; ${active ? 'background:var(--ptps-lime); color:#FFFFFF; font-weight:bold;' : ''}" 
-              onclick='startSynthesizedMidiLoop("${category}", ${JSON.stringify(trackObj)})'>
-              <span>${active ? '▶ ' : '🎵 '}${trackObj.name}</span>
-              <span style="font-size:0.75rem; opacity:0.8;">🔂 30s Loop</span>
+            <button class="control-btn ${isThisPlaying ? '' : 'secondary'}" style="justify-content: space-between; font-size: 0.9rem; padding: 0.6rem 1rem;" onclick="startSynthesizedMidiLoop('${cat}', ${JSON.stringify(t).replace(/"/g, '&quot;')})">
+              <span>${t.name}</span>
+              <span>${isThisPlaying ? '🔊 Playing' : '▶ Play'}</span>
             </button>
           `;
         });
-        html += `</div>`;
+        html += `
+            </div>
+          </div>
+        `;
       }
 
       html += `</div>`;
       container.innerHTML = html;
     }
 
-    // --- HELPER UTILITIES ---
-    function updateTileDisplay(toolId) {
-      const def = toolDefinitions[toolId];
-      if (!def) return;
-      const disp = document.getElementById(`grid_${toolId}_display`);
-      const sub = document.getElementById(`grid_${toolId}_subtext`);
-      if (disp) disp.textContent = def.getDisplay();
-      if (sub) sub.textContent = def.getSubtext();
-    }
-
-    function formatTime(ms) {
-      const totalSec = Math.floor(ms / 1000);
-      const m = Math.floor(totalSec / 60);
-      const s = totalSec % 60;
-      return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-    }
-
-    // --- INITIALIZATION ---
+    // --- INITIALIZATION ON PAGE LOAD ---
     window.addEventListener('DOMContentLoaded', () => {
-      loadSavedThemeMode();
       loadSavedRoster();
+      loadSavedThemeMode();
       loadDeviceViewChoice();
       loadSavedTileOrder();
       renderDashboardGrid();
